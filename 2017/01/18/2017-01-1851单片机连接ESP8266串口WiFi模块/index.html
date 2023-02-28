@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yiyufxst.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="烧录固件引脚连接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="51单片机连接ESP8266串口WiFi模块">
+<meta property="og:url" content="http://yiyufxst.github.io/2017/01/18/2017-01-1851%E5%8D%95%E7%89%87%E6%9C%BA%E8%BF%9E%E6%8E%A5ESP8266%E4%B8%B2%E5%8F%A3WiFi%E6%A8%A1%E5%9D%97/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="烧录固件引脚连接">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU1MTAzNDU0">
+<meta property="og:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU0OTUzMDk0">
+<meta property="og:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU1MTUzMTEw">
+<meta property="article:published_time" content="2017-01-18T07:06:11.000Z">
+<meta property="article:modified_time" content="2017-01-18T07:06:11.000Z">
+<meta property="article:author" content="yiyufxst">
+<meta property="article:tag" content="51单片机">
+<meta property="article:tag" content="ESP8266模块">
+<meta property="article:tag" content="Wifi模块">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU1MTAzNDU0">
+
+<link rel="canonical" href="http://yiyufxst.github.io/2017/01/18/2017-01-1851%E5%8D%95%E7%89%87%E6%9C%BA%E8%BF%9E%E6%8E%A5ESP8266%E4%B8%B2%E5%8F%A3WiFi%E6%A8%A1%E5%9D%97/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>51单片机连接ESP8266串口WiFi模块 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yiyufxst.github.io/2017/01/18/2017-01-1851%E5%8D%95%E7%89%87%E6%9C%BA%E8%BF%9E%E6%8E%A5ESP8266%E4%B8%B2%E5%8F%A3WiFi%E6%A8%A1%E5%9D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yiyufxst">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          51单片机连接ESP8266串口WiFi模块
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-18 15:06:11" itemprop="dateCreated datePublished" datetime="2017-01-18T15:06:11+08:00">2017-01-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A1%AC%E4%BB%B6/" itemprop="url" rel="index"><span itemprop="name">硬件</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="烧录固件"><a href="#烧录固件" class="headerlink" title="烧录固件"></a>烧录固件</h3><h4 id="引脚连接"><a href="#引脚连接" class="headerlink" title="引脚连接"></a>引脚连接</h4><table>
+<thead>
+<tr>
+<th align="center">WiFi</th>
+<th align="center">51单片机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">VCC</td>
+<td align="center">3.3V （5V连接时间过长可能会烧坏WiFi模块）</td>
+</tr>
+<tr>
+<td align="center">GND</td>
+<td align="center">GND</td>
+</tr>
+<tr>
+<td align="center">CH_PD</td>
+<td align="center">3.3V</td>
+</tr>
+<tr>
+<td align="center">GPIO0</td>
+<td align="center">GND</td>
+</tr>
+<tr>
+<td align="center">UTXD</td>
+<td align="center">TXD</td>
+</tr>
+<tr>
+<td align="center">URXD</td>
+<td align="center">RXD</td>
+</tr>
+</tbody></table>
+<h4 id="烧录固件-1"><a href="#烧录固件-1" class="headerlink" title="烧录固件"></a>烧录固件</h4><ol>
+<li>打开烧录软件，选择配置选项卡，点击第二栏的小齿轮图标 - 加载固件地址<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU1MTAzNDU0" alt="配置选项卡"></li>
+<li>点击其他选项的选择栏，取消选中，只选择第二个选项（固件地址）<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU0OTUzMDk0" alt="配置固件位置"></li>
+<li>返回操作选项卡，选择正确COM端口，点击一键烧写</li>
+<li>模块重新上电，下载开始，等待下载完成<br><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwMTE4MTU1MTUzMTEw" alt="成功样图"></li>
+</ol>
+<h3 id="串口助手测试ESP8266串口WiFi模块"><a href="#串口助手测试ESP8266串口WiFi模块" class="headerlink" title="串口助手测试ESP8266串口WiFi模块"></a>串口助手测试ESP8266串口WiFi模块</h3><h4 id="引脚连接-1"><a href="#引脚连接-1" class="headerlink" title="引脚连接"></a>引脚连接</h4><table>
+<thead>
+<tr>
+<th align="center">WiFi</th>
+<th align="center">51单片机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">VCC</td>
+<td align="center">3.3V （5V连接时间过长可能会烧坏WiFi模块）</td>
+</tr>
+<tr>
+<td align="center">GND</td>
+<td align="center">GND</td>
+</tr>
+<tr>
+<td align="center">CH_PD</td>
+<td align="center">3.3V</td>
+</tr>
+<tr>
+<td align="center">UTXD</td>
+<td align="center">TXD</td>
+</tr>
+<tr>
+<td align="center">URXD</td>
+<td align="center">RXD</td>
+</tr>
+</tbody></table>
+<p><strong>注：此时连接状态 WiFi模块–&gt;51单片机–&gt;串口助手（PC），由于WiFi模块和单片机的TXD和RXD处于正接状态，单片机和WiFi模块并不通信，相当于WiFi模块直连串口助手。</strong></p>
+<h4 id="AT常用指令"><a href="#AT常用指令" class="headerlink" title="AT常用指令"></a>AT常用指令</h4><p>ESP8266串口WiFi模块分为三种工作模式：Station模式（类似无线终端），AP模式（提供无线接入服务），AP模式兼Station模式。</p>
+<p>通过串口助手测试WiFi模块时，</p>
+<p><strong>测试</strong></p>
+<p>发送指令：<code>AT</code></p>
+<p>响应：OK</p>
+<p><strong>重启模块</strong></p>
+<p>发送命令：<code>AT+RST</code></p>
+<p>响应 ：OK</p>
+<p><strong>设置模块</strong></p>
+<p>发送指令：<code>AT+CWMODE = &lt;mode&gt;</code> </p>
+<p>说明：需重启后生效(AT+RST)</p>
+<pre><code>&lt;mode&gt;：1-Station模式，2-AP模式，3-AP兼Station模式。
+</code></pre>
+<p>响应：OK </p>
+<p><strong>配置AP参数</strong>  </p>
+<p>发送命令：</p>
+<p>指令：<code>AT+ CWSAP= &lt;ssid&gt;,&lt;pwd&gt;,&lt;chl&gt;, &lt;ecn&gt;</code>  </p>
+<p>说明：指令只有在AP模式开启后有效 </p>
+<pre><code>&lt;ssid&gt;：字符串参数，接入点名称 
+&lt;pwd&gt;：字符串参数，密码最长64字节，ASCII
+&lt;chl&gt;：通道号 
+&lt;ecn&gt;：加密模式，0-OPEN，1-WEP，2-WPA_PSK，3-WPA2_PSK，4-WPA_WPA2_PSK  
+</code></pre>
+<p>示例：<code>AT+CWSAP=”TEST”,”123456123456”,1,3</code></p>
+<p>响应：OK </p>
+<p><strong>开启多连接模式</strong> </p>
+<p>发送命令：<code>AT+CIPMUX=&lt;mode&gt;</code> </p>
+<p>说明：<code>&lt;mode&gt;</code> ：0-单路连接模式，1-多路连接模式 </p>
+<p>响应：OK </p>
+<p><strong>创建服务器</strong> </p>
+<p>发送命令：<code>AT+CIPSERVER=&lt;mode&gt;,&lt;port&gt;</code> </p>
+<p>说明：AT+ CIPMUX=1时才能开启服务器；关闭server模式需要重启。开启server后自动建立server监听,当有client接入会自动按顺序占用一个连接。 </p>
+<pre><code>&lt;mode&gt;:0-关闭server模式，1-开启server模式       
+&lt;port&gt;:端口号，缺省值为333 
+</code></pre>
+<p>响应：OK  </p>
+<h3 id="通过51单片机初始化WiFi模块"><a href="#通过51单片机初始化WiFi模块" class="headerlink" title="通过51单片机初始化WiFi模块"></a>通过51单片机初始化WiFi模块</h3><p>通过串口助手测试AT指令可以发现，部分AT指令断电不会保存，因此需要在代码中进行初始化设置。</p>
+<h4 id="引脚连接-2"><a href="#引脚连接-2" class="headerlink" title="引脚连接"></a>引脚连接</h4><table>
+<thead>
+<tr>
+<th align="center">WiFi</th>
+<th align="center">51单片机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">VCC</td>
+<td align="center">3.3V （5V连接时间过长可能会烧坏WiFi模块）</td>
+</tr>
+<tr>
+<td align="center">GND</td>
+<td align="center">GND</td>
+</tr>
+<tr>
+<td align="center">CH_PD</td>
+<td align="center">3.3V</td>
+</tr>
+<tr>
+<td align="center">UTXD</td>
+<td align="center">RXD</td>
+</tr>
+<tr>
+<td align="center">URXD</td>
+<td align="center">TXD</td>
+</tr>
+</tbody></table>
+<p><strong>注：此时连接状态 WiFi模块–&gt;51单片机–&gt;串口助手（PC），由于WiFi模块和单片机的TXD和RXD处于反接状态，单片机和WiFi模块可以进行串口通信。</strong></p>
+<h4 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span><span class="string">&lt;reg52.h&gt;</span>				<span class="comment">//51单片机常用的头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> uchar unsigned char		<span class="comment">//宏定义一个无符号的char类型</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> uint unsigned int		<span class="comment">//宏定义一个无符号的int类型</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">//发送一字节</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">sendByte</span><span class="params">(uchar b)</span></span><br><span class="line">&#123;</span><br><span class="line">  SBUF = b;</span><br><span class="line">  <span class="keyword">while</span>(!TI);</span><br><span class="line">  TI=<span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//发送字符串</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">sendString</span><span class="params">(uchar *s)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">while</span>(*s != <span class="string">&#x27;\0&#x27;</span>)	<span class="comment">//字符串默认结尾&#x27;\0&#x27;，以此来判断字符串的结束</span></span><br><span class="line">  &#123;</span><br><span class="line">    sendByte(*s);</span><br><span class="line">    s++;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//初始化ESP8266WiFi模块</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">initEsp</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  uint a;</span><br><span class="line">  SCON = <span class="number">0x50</span>;    <span class="comment">//8位数据，可变波特率</span></span><br><span class="line">  TMOD = <span class="number">0x20</span>;    <span class="comment">//设置定时器1位16位自动重装模式</span></span><br><span class="line">  TL1 = <span class="number">0xfd</span>;     <span class="comment">//设置定时器初值，波特率为9600</span></span><br><span class="line">  TH1 = <span class="number">0xfd</span>;</span><br><span class="line">  ET1 = <span class="number">0</span>;        <span class="comment">//禁止定时器1中断</span></span><br><span class="line">  TR1 = <span class="number">1</span>;        <span class="comment">//启动定时器1</span></span><br><span class="line">  EA = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">50000</span>; a++);		<span class="comment">//延时几秒，让模块有时间启动</span></span><br><span class="line">  sendString(<span class="string">&quot;AT+CWMODE=2\n&quot;</span>);	<span class="comment">//设置为AP模式</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//WiFi热点不能通过代码设置，可使用串口助手进行设置，该设置断电不丢失</span></span><br><span class="line">  <span class="comment">/*</span></span><br><span class="line"><span class="comment">  for (a=0; a&lt;20000; a++);</span></span><br><span class="line"><span class="comment">  sendString(&quot;AT+CWSAP=&#x27;TEST&#x27;,&#x27;12345678&#x27;,1,3\n&quot;); //建立WiFi热点</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">50000</span>; a++);    </span><br><span class="line">  sendString(<span class="string">&quot;AT+CIPMUX=1\n&quot;</span>); <span class="comment">//启动多连接</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">20000</span>; a++);</span><br><span class="line">  sendString(<span class="string">&quot;AT+CIPSERVER=1,333\n&quot;</span>);<span class="comment">//建立server，端口为333</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">20000</span>; a++);</span><br><span class="line">  sendString(<span class="string">&quot;AT+CIPSTO=50\n&quot;</span>);     <span class="comment">//服务器超时时间设置</span></span><br><span class="line"></span><br><span class="line">  RI=<span class="number">0</span>;</span><br><span class="line">  ES=<span class="number">1</span>;   <span class="comment">//初始化完成，串行口中断打开</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//主函数  </span></span><br><span class="line"><span class="type">void</span>  <span class="title function_">main</span><span class="params">()</span>  </span><br><span class="line">&#123;  </span><br><span class="line">  initEsp();</span><br><span class="line">&#125;      </span><br></pre></td></tr></table></figure>
+
+<p><strong>注：代码中波特率应和串口助手的波特率相符，且部分AT命令如重启模块，设置WiFi热点等指令无法使用。</strong></p>
+<h3 id="获取WiFi传输的数据"><a href="#获取WiFi传输的数据" class="headerlink" title="获取WiFi传输的数据"></a>获取WiFi传输的数据</h3><p>ESP8266WiFi模块作为TCP服务器接受来自客户端的信息前默认会加上<code>+IPD,n,&lt;string.length&gt;:</code>这样的字符，处理时应注意。</p>
+<h4 id="实现代码-1"><a href="#实现代码-1" class="headerlink" title="实现代码"></a>实现代码</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取数据，数据格式示例：+IPD,0,14:&quot;time&quot;:&quot;11:11&quot;</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">getData</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  uint a;</span><br><span class="line">  <span class="keyword">if</span>(receiveFlag)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">2</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">      Hour[i]=Buffer[<span class="number">17</span>+i];</span><br><span class="line">    &#125;</span><br><span class="line">    Hour[<span class="number">2</span>]=<span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">2</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">      Minute[i]=Buffer[<span class="number">20</span>+i];</span><br><span class="line">    &#125;</span><br><span class="line">    Minute[<span class="number">2</span>]=<span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将获取到的数据发送到串口助手上显示</span></span><br><span class="line">    <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">10000</span>; a++);	<span class="comment">//需要延时，负责会造成数据错乱导致丢包</span></span><br><span class="line">    sendString(Hour);</span><br><span class="line">    <span class="keyword">for</span> (a=<span class="number">0</span>; a&lt;<span class="number">10000</span>; a++);</span><br><span class="line">    sendString(Minute);</span><br><span class="line"></span><br><span class="line">    receiveFlag=<span class="number">0</span>;</span><br><span class="line">    count=<span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">22</span>; i++)</span><br><span class="line">    &#123;</span><br><span class="line">      Buffer[i]=<span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//主函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  initEsp();			<span class="comment">//初始化WiFi模块</span></span><br><span class="line">  receiveFlag = <span class="number">0</span>;		<span class="comment">//receiveFlag判断执行getData() 的标志</span></span><br><span class="line">  count = <span class="number">0</span>;			<span class="comment">//count缓冲区RXDdata[count]的索引  </span></span><br><span class="line">  <span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">  &#123; </span><br><span class="line">    getData();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//利用中断接收信息，且舍弃无效信息</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">uart</span><span class="params">()</span> interrupt 4  </span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">if</span>(RI == <span class="number">1</span>)	</span><br><span class="line">  &#123;</span><br><span class="line">    ES = <span class="number">0</span>;     <span class="comment">//关闭串行中断</span></span><br><span class="line">    RI = <span class="number">0</span>;     <span class="comment">//清除串口接收标志位</span></span><br><span class="line">    temp = SBUF; <span class="comment">//从串口缓冲区取得数据</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(count&lt;<span class="number">20</span>)	<span class="comment">//满足需接收的信息长度，将数据存入缓冲区</span></span><br><span class="line">    &#123; </span><br><span class="line">      Buffer[count]=temp;</span><br><span class="line">      count++;</span><br><span class="line">      <span class="keyword">if</span>(Buffer[<span class="number">0</span>]==<span class="string">&#x27;+&#x27;</span>)  <span class="comment">//判断是否为无效数据，由于WiFi模块会自动加上&quot;+PID..&quot;开头的字符串</span></span><br><span class="line">      &#123;</span><br><span class="line">        receiveFlag = <span class="number">1</span>; </span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        receiveFlag = <span class="number">0</span>;</span><br><span class="line">        count = <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125; </span><br><span class="line">    ES = <span class="number">1</span>; </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/51%E5%8D%95%E7%89%87%E6%9C%BA/" rel="tag"># 51单片机</a>
+              <a href="/tags/ESP8266%E6%A8%A1%E5%9D%97/" rel="tag"># ESP8266模块</a>
+              <a href="/tags/Wifi%E6%A8%A1%E5%9D%97/" rel="tag"># Wifi模块</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/16/2017-01-16%E8%85%BE%E8%AE%AF%E4%BA%91(CentOS)%E6%90%AD%E5%BB%BAHexo%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2/" rel="prev" title="腾讯云(CentOS)搭建Hexo静态博客">
+      <i class="fa fa-chevron-left"></i> 腾讯云(CentOS)搭建Hexo静态博客
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/12/2017-02-12Windows(x64,%2064bit)%E5%8D%87%E7%BA%A7MySQL%205.7.17%E5%85%8D%E5%AE%89%E8%A3%85%E7%89%88/" rel="next" title="Windows(x64, 64bit)升级MySQL 5.7.17免安装版">
+      Windows(x64, 64bit)升级MySQL 5.7.17免安装版 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%83%A7%E5%BD%95%E5%9B%BA%E4%BB%B6"><span class="nav-number">1.</span> <span class="nav-text">烧录固件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.1.</span> <span class="nav-text">引脚连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%83%A7%E5%BD%95%E5%9B%BA%E4%BB%B6-1"><span class="nav-number">1.2.</span> <span class="nav-text">烧录固件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B2%E5%8F%A3%E5%8A%A9%E6%89%8B%E6%B5%8B%E8%AF%95ESP8266%E4%B8%B2%E5%8F%A3WiFi%E6%A8%A1%E5%9D%97"><span class="nav-number">2.</span> <span class="nav-text">串口助手测试ESP8266串口WiFi模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E8%BF%9E%E6%8E%A5-1"><span class="nav-number">2.1.</span> <span class="nav-text">引脚连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AT%E5%B8%B8%E7%94%A8%E6%8C%87%E4%BB%A4"><span class="nav-number">2.2.</span> <span class="nav-text">AT常用指令</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%8751%E5%8D%95%E7%89%87%E6%9C%BA%E5%88%9D%E5%A7%8B%E5%8C%96WiFi%E6%A8%A1%E5%9D%97"><span class="nav-number">3.</span> <span class="nav-text">通过51单片机初始化WiFi模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%95%E8%84%9A%E8%BF%9E%E6%8E%A5-2"><span class="nav-number">3.1.</span> <span class="nav-text">引脚连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81"><span class="nav-number">3.2.</span> <span class="nav-text">实现代码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96WiFi%E4%BC%A0%E8%BE%93%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">4.</span> <span class="nav-text">获取WiFi传输的数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E4%BB%A3%E7%A0%81-1"><span class="nav-number">4.1.</span> <span class="nav-text">实现代码</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">yiyufxst</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">13</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yiyufxst</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
