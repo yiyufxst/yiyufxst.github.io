@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yiyufxst.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1. 软件架构软件程序通常由两方面需求组成：  功能性需求：程序能为用户做什么，比如，查看订单信息、下单等。 非功能性需求：除功能性需求以外的其他必要需求，比如，访问性能、安全性、容错和恢复、本地化、国际化等。  非功能性需求所构建起来的正是我们所认知的软件架构。 什么是软件架构？ 简单来说就是软件组成的基本结构，主要为三个要素：代码、代码之间的关系和两者各自的属性。 最经典的软件架构就是分层架构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 必知必会——分层思维">
+<meta property="og:url" content="http://yiyufxst.github.io/2021/07/25/2021-07-25Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E5%88%86%E5%B1%82%E6%80%9D%E7%BB%B4/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="1. 软件架构软件程序通常由两方面需求组成：  功能性需求：程序能为用户做什么，比如，查看订单信息、下单等。 非功能性需求：除功能性需求以外的其他必要需求，比如，访问性能、安全性、容错和恢复、本地化、国际化等。  非功能性需求所构建起来的正是我们所认知的软件架构。 什么是软件架构？ 简单来说就是软件组成的基本结构，主要为三个要素：代码、代码之间的关系和两者各自的属性。 最经典的软件架构就是分层架构">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/5f9467e504ae4cd189748a009bf3dcbb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2021-07-25T05:34:33.000Z">
+<meta property="article:modified_time" content="2021-07-25T05:34:33.000Z">
+<meta property="article:author" content="yiyufxst">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="分层架构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/5f9467e504ae4cd189748a009bf3dcbb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="http://yiyufxst.github.io/2021/07/25/2021-07-25Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E5%88%86%E5%B1%82%E6%80%9D%E7%BB%B4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 必知必会——分层思维 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yiyufxst.github.io/2021/07/25/2021-07-25Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E5%88%86%E5%B1%82%E6%80%9D%E7%BB%B4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yiyufxst">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 必知必会——分层思维
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-25 13:34:33" itemprop="dateCreated datePublished" datetime="2021-07-25T13:34:33+08:00">2021-07-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="1-软件架构"><a href="#1-软件架构" class="headerlink" title="1. 软件架构"></a>1. 软件架构</h4><p>软件程序通常由两方面需求组成：</p>
+<ul>
+<li><strong>功能性需求</strong>：程序能为用户做什么，比如，查看订单信息、下单等。</li>
+<li><strong>非功能性需求</strong>：除功能性需求以外的其他必要需求，比如，访问性能、安全性、容错和恢复、本地化、国际化等。</li>
+</ul>
+<p><strong>非功能性需求所构建起来的正是我们所认知的软件架构。</strong></p>
+<p>什么是软件架构？</p>
+<p>简单来说就是软件组成的基本结构，主要为三个要素：代码、代码之间的关系和两者各自的属性。</p>
+<p>最经典的软件架构就是分层架构，也就是将软件系统分层。</p>
+<h4 id="2-什么是代码分层架构？"><a href="#2-什么是代码分层架构？" class="headerlink" title="2. 什么是代码分层架构？"></a>2. 什么是代码分层架构？</h4><p>想知道代码分层结构是什么，就要从软件部署分层架构开始。</p>
+<p>常见的软件分层架构，主要有四个部分组成：</p>
+<p><img src="https://img-blog.csdnimg.cn/5f9467e504ae4cd189748a009bf3dcbb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ul>
+<li>客户端（Client）：也就是调用方，比如浏览器和 APP。</li>
+<li>Web 服务器（Web Server）：实现程序的运行逻辑，并从缓存或数据层获取数据，返回给上层客户端。</li>
+<li>应用服务器的缓存（Cache）：加速存储数据的访问。</li>
+<li>数据层（Database）：存储数据。</li>
+</ul>
+<p>简单来说，<strong>软件分层架构就是通过层来隔离不同的关注点（变化相似的部分）</strong>，以此来解决不同需求变化的问题，让这种变化可以被控制同一个层中。</p>
+<p>软件开发者通常更关心的是应用程序（Web Server）的分层架构，比如常见的 MVC 分层架构。其他的如 Database、Cache等都有自己的代码分层架构。</p>
+<p>那么，什么是代码分层架构？</p>
+<p><strong>代码分层架构就是将软件 “ 元素 ”（代码）按照 “ 层 ” （代码关系）的方式组织起来的一种结构。</strong> </p>
+<p><strong>分层架构的核心原则：当请求或数据从外部传递过来后，必须从上一层传递到下一层。</strong></p>
+<h4 id="3-代码分层架构解决的问题"><a href="#3-代码分层架构解决的问题" class="headerlink" title="3. 代码分层架构解决的问题"></a>3. 代码分层架构解决的问题</h4><p>代码分层架构主要解决两个问题：</p>
+<ul>
+<li>如何快速拆解功能问题？</li>
+<li>如何提升代码的可扩展性？</li>
+</ul>
+<h5 id="3-1-通过分层来拆解问题"><a href="#3-1-通过分层来拆解问题" class="headerlink" title="3.1 通过分层来拆解问题"></a>3.1 通过分层来拆解问题</h5><p>软件开发过程中，一个功能需求问题一般都是笼统的复杂问题，需要将这个笼统的复杂问题拆分为多个层次的子问题来解决。</p>
+<p>比如用户短信登录验证这个功能？可以拆解为：</p>
+<ol>
+<li>验证用户是否存在</li>
+<li>发送短信验证码</li>
+<li>校验短信验证码</li>
+</ol>
+<p>这是最初问题的第一次拆分，在具体到每个细节点：</p>
+<ol>
+<li>验证用户是否存在<ul>
+<li>获取用户输入内容（View+Controller）</li>
+<li>查询用户是否存在（Model）</li>
+<li>返回结果（View）</li>
+</ul>
+</li>
+<li>发送短信验证码<ul>
+<li>获取用户手机号（View+Controller）</li>
+<li>Api 向手机发送登录验证码 (Model)</li>
+<li>60s 之后才能再次发送，避免用户频繁触发验证码发送（View）</li>
+</ul>
+</li>
+<li>校验短信验证码<ul>
+<li>获取用户输入验证码（View+Controller）</li>
+<li>Api 向验证登录验证码 (Model)</li>
+<li>返回结果（View）</li>
+</ul>
+</li>
+</ol>
+<p>不知不觉中，通过分层就把一个复杂的大问题拆解为了多个容易解决的子层问题，可能很多子层问题已经被解决了，比如发送短信验证码、校验验证码等。最后，真正需要关注的问题实际上变少了。</p>
+<p>因此，<strong>从功能性需求触发，代码分层本身就是一种拆解复杂问题的好方法</strong>。</p>
+<h5 id="3-2-通过分层来提升代码可扩展性"><a href="#3-2-通过分层来提升代码可扩展性" class="headerlink" title="3.2 通过分层来提升代码可扩展性"></a>3.2 通过分层来提升代码可扩展性</h5><p>为什么要提高代码可扩展性？</p>
+<p>因为真实的系统数据一直在不断增长，比如存储的数据从一百万增长到一千万、一个亿，单体架构往往难以承载这种数据量，往往是因为扩展服务器和数据库功能时，一个的代码修改就可能影响到整个系统功能。</p>
+<p>分层架构可以将复杂的逻辑切分为多层，将大问题变成了小问题。</p>
+<p>这样每个小问题就容易解决，容易被抽象为一个组件，当组件功能需要扩充或者替换时，修改代码的影响也被有效控制在有限范围内，此时，<strong>组件自身的复用性也提高了</strong>。</p>
+<p>除此之外，分层架构还<strong>更容易做服务的横向扩展</strong>。</p>
+<p>简单来说，可以用多台服务器共同提供服务，也就是集群部署。比如将 Model 层单独抽取出来作为数据服务层部署，这样不影响其他业务层，同时负载增大时，仅扩展 Model 层即可扩展整个系统的承载能力。</p>
+<h4 id="4-代码分层架构优缺点"><a href="#4-代码分层架构优缺点" class="headerlink" title="4. 代码分层架构优缺点"></a>4. 代码分层架构优缺点</h4><h5 id="4-1-代码分层架构优点"><a href="#4-1-代码分层架构优点" class="headerlink" title="4.1 代码分层架构优点"></a>4.1 代码分层架构优点</h5><ul>
+<li>只需关注整体结构其中某一层的具体实现。</li>
+<li>降低了层与层之间的依赖。</li>
+<li>容易使用新的实现来替换原有层的实现。</li>
+<li>有利于标准化统一。</li>
+<li>各层逻辑便于复用。</li>
+</ul>
+<p>总的来说，代码分层架构设计主要是为了<strong>实现责任分离、解耦、组件复用和标准指定</strong>。</p>
+<p>由于层本身就是一种组件形式，层与层划分后，可以通过统一的接口与外界进行交互，而不是按照功能上的依赖进行交互。</p>
+<p>这里，统一的接口是模块之间互相约定的统一标准，只要按照标准来进行代码实现，就不会因为代码改动而影响到接口的使用。</p>
+<h5 id="4-2-代码分层架构缺点"><a href="#4-2-代码分层架构缺点" class="headerlink" title="4.2 代码分层架构缺点"></a>4.2 代码分层架构缺点</h5><ul>
+<li>开发成本变高：因为各层责任不同，如果高层添加功能，需要各个低层来提供支持，难免会增加开发成本。</li>
+<li>性能降低：请求数据经过多层代码处理，执行时间变长，性能会有所消耗。</li>
+<li>代码复杂度增加：因为层与层之间存在强耦合，因此一些组合功能的调用，需要增加很多层之间的相互调用。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84/" rel="tag"># 分层架构</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/10/2021-07-10Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94Unix%E5%93%B2%E5%AD%A6%E5%92%8C%E7%BB%84%E5%90%88%E6%80%9D%E7%BB%B4/" rel="prev" title="Java 必知必会——Unix哲学和组合思维">
+      <i class="fa fa-chevron-left"></i> Java 必知必会——Unix哲学和组合思维
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/11/27/2022-11-27%E4%B8%80%E6%AC%A1%E5%A4%9A%E8%A1%A8%E5%85%B3%E8%81%94%E9%A1%BA%E5%BA%8F%E7%9A%84%E6%85%A2%E6%9F%A5%E8%AF%A2%E2%80%94%E2%80%94TiDB/" rel="next" title="一次多表关联顺序的慢查询——TiDB 关联特性">
+      一次多表关联顺序的慢查询——TiDB 关联特性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">1. 软件架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AF%E4%BB%A3%E7%A0%81%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">2. 什么是代码分层架构？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E4%BB%A3%E7%A0%81%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">3. 代码分层架构解决的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E9%80%9A%E8%BF%87%E5%88%86%E5%B1%82%E6%9D%A5%E6%8B%86%E8%A7%A3%E9%97%AE%E9%A2%98"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 通过分层来拆解问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E9%80%9A%E8%BF%87%E5%88%86%E5%B1%82%E6%9D%A5%E6%8F%90%E5%8D%87%E4%BB%A3%E7%A0%81%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 通过分层来提升代码可扩展性</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E4%BB%A3%E7%A0%81%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">4.</span> <span class="nav-text">4. 代码分层架构优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-%E4%BB%A3%E7%A0%81%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E4%BC%98%E7%82%B9"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 代码分层架构优点</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-%E4%BB%A3%E7%A0%81%E5%88%86%E5%B1%82%E6%9E%B6%E6%9E%84%E7%BC%BA%E7%82%B9"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 代码分层架构缺点</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">yiyufxst</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yiyufxst</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
