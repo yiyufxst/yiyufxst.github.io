@@ -202,67 +202,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="1-背景介绍"><a href="#1-背景介绍" class="headerlink" title="1. 背景介绍"></a>1. 背景介绍</h4><h5 id="1-1-基础表"><a href="#1-1-基础表" class="headerlink" title="1.1 基础表"></a>1.1 基础表</h5><p>用户表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> users (</span><br><span class="line">    id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line">    name <span class="type">varchar</span>(<span class="number">30</span>),</span><br><span class="line">    key `name` (`name`)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<p>帖子表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> posts (</span><br><span class="line">    id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line">    title <span class="type">varchar</span>(<span class="number">300</span>),</span><br><span class="line">    content text,</span><br><span class="line">    user_id <span class="type">int</span>,</span><br><span class="line">    cate_id <span class="type">int</span>,</span><br><span class="line">    key `user_id` (`user_id`),</span><br><span class="line">    key `cate_id` (`cate_id`)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<p>帖子分类表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> post_type (</span><br><span class="line">    id <span class="type">int</span> <span class="keyword">primary</span> key auto_increment,</span><br><span class="line">    type <span class="type">varchar</span>(<span class="number">10</span>),</span><br><span class="line">    name <span class="type">varchar</span>(<span class="number">30</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
-
-<h5 id="1-2-需求"><a href="#1-2-需求" class="headerlink" title="1.2 需求"></a>1.2 需求</h5><p>根据用户名获取该用户的某个分类下的帖子列表。</p>
-<h4 id="2-问题"><a href="#2-问题" class="headerlink" title="2. 问题"></a>2. 问题</h4><p>接到这个任务，看上去真的很简单，用户表关联帖子表关联帖子分类表即可查询到数据。</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> title, content, type</span><br><span class="line"><span class="keyword">from</span> users a, posts b, post_type c</span><br><span class="line"><span class="keyword">where</span> a.id <span class="operator">=</span> b.user_id</span><br><span class="line"><span class="keyword">and</span> b.cate_id <span class="operator">=</span> c.id</span><br><span class="line"><span class="keyword">and</span> a.name <span class="operator">=</span> <span class="string">&#x27;name1&#x27;</span></span><br><span class="line"><span class="keyword">and</span> c.type <span class="operator">=</span> <span class="string">&#x27;type1&#x27;</span></span><br><span class="line">limit <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
-
-<p>写完 SQL，当然要分析下 SQL 性能了。<br><img src="https://tidb-blog.oss-cn-beijing.aliyuncs.com/media/%E6%85%A2%E6%9F%A5%E8%AF%A2-%E9%94%99%E8%AF%AF%E5%88%86%E6%9E%90%E6%89%A7%E8%A1%8C%E8%B7%AF%E5%BE%84-1659169680266.png" alt="在这里插入图片描述"></p>
-<p>怎么回事，索引和预期走的不一样，怎么是帖子表 b 和帖子分类表 c 先做了一次 HashJoin？</p>
-<p>线上帖子表 b 数据很多，与分类表 c 做关联的话，那岂不是慢查询！</p>
-<p>为什么不是用户表 a 和 帖子表 b 先做关联呢，这两个表做关联之后数据就很少了，查询应该不会慢。</p>
-<h4 id="3-解决过程"><a href="#3-解决过程" class="headerlink" title="3. 解决过程"></a>3. 解决过程</h4><h5 id="3-1-ANALYZE"><a href="#3-1-ANALYZE" class="headerlink" title="3.1 ANALYZE"></a>3.1 ANALYZE</h5><p>尝试一下之前还没切换 TiDB 的 MySQL 测试环境，执行符合预期啊！</p>
-<p>看起来是 TiDB 的特性嘛！论坛里搜一搜先！<br><img src="https://tidb-blog.oss-cn-beijing.aliyuncs.com/media/ANALYZE-1659169706476.png" alt="在这里插入图片描述"></p>
-<p>这个帖子结帖信息就很相似啊，执行计划选择错误！</p>
-<p>那来看一下 ANALYZE 的作用，为什么会导致这种情况呢？</p>
-<blockquote>
-<p><code>ANALYZE</code> 语句用于更新 TiDB 在表和索引上留下的统计信息。执行大批量更新或导入记录后，或查询执行计划不是最佳时，建议运行 <code>ANALYZE</code>。</p>
-<p>当 TiDB 逐渐发现这些统计数据与预估不一致时，也会自动更新其统计数据。</p>
-<p>​                                                                                                    —— TiDB 官方文档</p>
-</blockquote>
-<p>看了描述，测试环境应该没有大量删除和导入，死马当活马医，对三个表执行了下 analyze，果然没有效果。</p>
-<p>论坛继续搜了搜也没有很符合的案例，但不怕，官方文档里还有有 SQL 性能调优系列文档，一篇篇翻下来吧，应该能找到问题。</p>
-<h5 id="3-2-Join-Reorder-算法"><a href="#3-2-Join-Reorder-算法" class="headerlink" title="3.2 Join Reorder 算法"></a>3.2 Join Reorder 算法</h5><p>皇天不负有心人，这个 Join Reorder 算法好像有点意思。</p>
-<blockquote>
-<p>在实际的业务场景中，多个表的 Join 语句是很常见的，而 Join 的执行效率和各个表参与 Join 的顺序有关系。</p>
-<p>如 <code>select * from t1, t2, t3 where t1.a=t2.a and t3.a=t2.a</code>，这个 SQL 中可能的执行顺序有 “t1 和 t2 先做 Join，然后再和 t3 做 Join” 以及 “t2 和 t3 先做 Join，然后再和 t1 做 Join” 两种情况。根据 <code>t1</code> 和 <code>t3</code> 的数据量及数据分布，这两种执行顺序会有不同的性能表现。</p>
-<p>因此优化器需要实现一种决定 Join 顺序的算法。目前 TiDB 中使用的算法是 Join Reorder 算法，又称贪心算法。</p>
-<p>当前的 Join Reorder 算法存在如下限制：</p>
-<ul>
-<li>受结果集的计算算法所限并不会保证一定会选到合适的 Join order</li>
-</ul>
-<p>​                                                                                                    —— TiDB 官方文档</p>
-</blockquote>
-<p><img src="https://tidb-blog.oss-cn-beijing.aliyuncs.com/media/JoinReorder%E7%AE%97%E6%B3%95%E5%AE%9E%E4%BE%8B-1659169726887.png" alt="在这里插入图片描述"></p>
-<p>很符合我的情况，帖子分类表最小，所以会用帖子分类表 c 来去尝试和用户表 a 和帖子表 b 分别做 Join。</p>
-<p>然后就选择了帖子表 b 和帖子分类表 c 做关联。</p>
-<p>但因为帖子表数据量非常大，帖子分类表很小，这两个表做关联的话，关联后的结果很多。</p>
-<p>而用户表 a 和帖子表 c 关联，可能只有几十条数据，之后再关联分类表 C 这才是一个最佳的执行路径！</p>
-<p>既然找到了问题，那 TiDB 当然有现成的解决方案！</p>
-<h5 id="3-3-STRAIGHT-JOIN"><a href="#3-3-STRAIGHT-JOIN" class="headerlink" title="3.3 STRAIGHT_JOIN"></a>3.3 STRAIGHT_JOIN</h5><blockquote>
-<p> 目前 TiDB 中支持使用 <code>STRAIGHT_JOIN</code> 语法来强制指定一种 Join 顺序。<br> <code>STRAIGHT_JOIN()</code> 提示优化器在生成表连接顺序时按照表名在 <code>FROM</code> 子句中出现的顺序进行连接。<br> <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="comment">/*+ STRAIGHT_JOIN() */</span> <span class="operator">*</span> <span class="keyword">FROM</span> t t1, t t2 <span class="keyword">WHERE</span> t1.a <span class="operator">=</span> t2.a;</span><br></pre></td></tr></table></figure><br> 来来来，试一下：</p>
-</blockquote>
-<p><img src="https://tidb-blog.oss-cn-beijing.aliyuncs.com/media/STRARIGHT_JOIN-1659169736419.png" alt="在这里插入图片描述"></p>
-<p>果然，执行结果按照顺序选择了最优执行路径，问题解决！</p>
-<h4 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h4><p>虽然 TiDB 支持了几乎 100% 的 MySQL 语法，但还是会有很多由于实现、分布式等原因导致由一些独有的特性。</p>
-<p>因此，在使用时，不能经验主义，每个 SQL 还是要老老实实在 TiDB 中执行一次，确认是否符合预期。</p>
-<p>如果不符合预期，那也不用怕，TiDB 的论坛和文档很丰富，慢慢看，别着急，总有一款适合你的解决方案。</p>
-<p>参考文档：</p>
-<ol>
-<li><a target="_blank" rel="noopener" href="https://docs.pingcap.com/zh/tidb/stable/mysql-compatibility#%E4%B8%8E-mysql-%E5%85%BC%E5%AE%B9%E6%80%A7%E5%AF%B9%E6%AF%94">与 MySQL 兼容性对比</a></li>
-<li><a target="_blank" rel="noopener" href="https://docs.pingcap.com/zh/tidb/stable/sql-tuning-overview">SQL 性能调优</a></li>
-<li><a target="_blank" rel="noopener" href="https://docs.pingcap.com/zh/tidb/stable/sql-statement-analyze-table#analyze">ANALYZE 文档</a></li>
-<li><a target="_blank" rel="noopener" href="https://asktug.com/t/topic/662958">ANALYZE TABLE 作用 - TiDB - TiDB 的问答社区 (asktug.com)</a></li>
-</ol>
-
+          <h4 id="1-背景介绍"><a href="#1-背景介绍" class="headerlink" title="1. 背景介绍"></a>1. 背景介绍</h4><h5 id="1-1-基础表"><a href="#1-1-基础表" class="headerlink" title="1.1 基础表"></a>1.1 基础表</h5>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/11/27/2022-11-27%E4%B8%80%E6%AC%A1%E5%A4%9A%E8%A1%A8%E5%85%B3%E8%81%94%E9%A1%BA%E5%BA%8F%E7%9A%84%E6%85%A2%E6%9F%A5%E8%AF%A2%E2%80%94%E2%80%94TiDB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -329,85 +277,14 @@
 
       
           <h4 id="1-软件架构"><a href="#1-软件架构" class="headerlink" title="1. 软件架构"></a>1. 软件架构</h4><p>软件程序通常由两方面需求组成：</p>
-<ul>
-<li><strong>功能性需求</strong>：程序能为用户做什么，比如，查看订单信息、下单等。</li>
-<li><strong>非功能性需求</strong>：除功能性需求以外的其他必要需求，比如，访问性能、安全性、容错和恢复、本地化、国际化等。</li>
-</ul>
-<p><strong>非功能性需求所构建起来的正是我们所认知的软件架构。</strong></p>
-<p>什么是软件架构？</p>
-<p>简单来说就是软件组成的基本结构，主要为三个要素：代码、代码之间的关系和两者各自的属性。</p>
-<p>最经典的软件架构就是分层架构，也就是将软件系统分层。</p>
-<h4 id="2-什么是代码分层架构？"><a href="#2-什么是代码分层架构？" class="headerlink" title="2. 什么是代码分层架构？"></a>2. 什么是代码分层架构？</h4><p>想知道代码分层结构是什么，就要从软件部署分层架构开始。</p>
-<p>常见的软件分层架构，主要有四个部分组成：</p>
-<p><img src="https://img-blog.csdnimg.cn/5f9467e504ae4cd189748a009bf3dcbb.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
-<ul>
-<li>客户端（Client）：也就是调用方，比如浏览器和 APP。</li>
-<li>Web 服务器（Web Server）：实现程序的运行逻辑，并从缓存或数据层获取数据，返回给上层客户端。</li>
-<li>应用服务器的缓存（Cache）：加速存储数据的访问。</li>
-<li>数据层（Database）：存储数据。</li>
-</ul>
-<p>简单来说，<strong>软件分层架构就是通过层来隔离不同的关注点（变化相似的部分）</strong>，以此来解决不同需求变化的问题，让这种变化可以被控制同一个层中。</p>
-<p>软件开发者通常更关心的是应用程序（Web Server）的分层架构，比如常见的 MVC 分层架构。其他的如 Database、Cache等都有自己的代码分层架构。</p>
-<p>那么，什么是代码分层架构？</p>
-<p><strong>代码分层架构就是将软件 “ 元素 ”（代码）按照 “ 层 ” （代码关系）的方式组织起来的一种结构。</strong> </p>
-<p><strong>分层架构的核心原则：当请求或数据从外部传递过来后，必须从上一层传递到下一层。</strong></p>
-<h4 id="3-代码分层架构解决的问题"><a href="#3-代码分层架构解决的问题" class="headerlink" title="3. 代码分层架构解决的问题"></a>3. 代码分层架构解决的问题</h4><p>代码分层架构主要解决两个问题：</p>
-<ul>
-<li>如何快速拆解功能问题？</li>
-<li>如何提升代码的可扩展性？</li>
-</ul>
-<h5 id="3-1-通过分层来拆解问题"><a href="#3-1-通过分层来拆解问题" class="headerlink" title="3.1 通过分层来拆解问题"></a>3.1 通过分层来拆解问题</h5><p>软件开发过程中，一个功能需求问题一般都是笼统的复杂问题，需要将这个笼统的复杂问题拆分为多个层次的子问题来解决。</p>
-<p>比如用户短信登录验证这个功能？可以拆解为：</p>
-<ol>
-<li>验证用户是否存在</li>
-<li>发送短信验证码</li>
-<li>校验短信验证码</li>
-</ol>
-<p>这是最初问题的第一次拆分，在具体到每个细节点：</p>
-<ol>
-<li>验证用户是否存在<ul>
-<li>获取用户输入内容（View+Controller）</li>
-<li>查询用户是否存在（Model）</li>
-<li>返回结果（View）</li>
-</ul>
-</li>
-<li>发送短信验证码<ul>
-<li>获取用户手机号（View+Controller）</li>
-<li>Api 向手机发送登录验证码 (Model)</li>
-<li>60s 之后才能再次发送，避免用户频繁触发验证码发送（View）</li>
-</ul>
-</li>
-<li>校验短信验证码<ul>
-<li>获取用户输入验证码（View+Controller）</li>
-<li>Api 向验证登录验证码 (Model)</li>
-<li>返回结果（View）</li>
-</ul>
-</li>
-</ol>
-<p>不知不觉中，通过分层就把一个复杂的大问题拆解为了多个容易解决的子层问题，可能很多子层问题已经被解决了，比如发送短信验证码、校验验证码等。最后，真正需要关注的问题实际上变少了。</p>
-<p>因此，<strong>从功能性需求触发，代码分层本身就是一种拆解复杂问题的好方法</strong>。</p>
-<h5 id="3-2-通过分层来提升代码可扩展性"><a href="#3-2-通过分层来提升代码可扩展性" class="headerlink" title="3.2 通过分层来提升代码可扩展性"></a>3.2 通过分层来提升代码可扩展性</h5><p>为什么要提高代码可扩展性？</p>
-<p>因为真实的系统数据一直在不断增长，比如存储的数据从一百万增长到一千万、一个亿，单体架构往往难以承载这种数据量，往往是因为扩展服务器和数据库功能时，一个的代码修改就可能影响到整个系统功能。</p>
-<p>分层架构可以将复杂的逻辑切分为多层，将大问题变成了小问题。</p>
-<p>这样每个小问题就容易解决，容易被抽象为一个组件，当组件功能需要扩充或者替换时，修改代码的影响也被有效控制在有限范围内，此时，<strong>组件自身的复用性也提高了</strong>。</p>
-<p>除此之外，分层架构还<strong>更容易做服务的横向扩展</strong>。</p>
-<p>简单来说，可以用多台服务器共同提供服务，也就是集群部署。比如将 Model 层单独抽取出来作为数据服务层部署，这样不影响其他业务层，同时负载增大时，仅扩展 Model 层即可扩展整个系统的承载能力。</p>
-<h4 id="4-代码分层架构优缺点"><a href="#4-代码分层架构优缺点" class="headerlink" title="4. 代码分层架构优缺点"></a>4. 代码分层架构优缺点</h4><h5 id="4-1-代码分层架构优点"><a href="#4-1-代码分层架构优点" class="headerlink" title="4.1 代码分层架构优点"></a>4.1 代码分层架构优点</h5><ul>
-<li>只需关注整体结构其中某一层的具体实现。</li>
-<li>降低了层与层之间的依赖。</li>
-<li>容易使用新的实现来替换原有层的实现。</li>
-<li>有利于标准化统一。</li>
-<li>各层逻辑便于复用。</li>
-</ul>
-<p>总的来说，代码分层架构设计主要是为了<strong>实现责任分离、解耦、组件复用和标准指定</strong>。</p>
-<p>由于层本身就是一种组件形式，层与层划分后，可以通过统一的接口与外界进行交互，而不是按照功能上的依赖进行交互。</p>
-<p>这里，统一的接口是模块之间互相约定的统一标准，只要按照标准来进行代码实现，就不会因为代码改动而影响到接口的使用。</p>
-<h5 id="4-2-代码分层架构缺点"><a href="#4-2-代码分层架构缺点" class="headerlink" title="4.2 代码分层架构缺点"></a>4.2 代码分层架构缺点</h5><ul>
-<li>开发成本变高：因为各层责任不同，如果高层添加功能，需要各个低层来提供支持，难免会增加开发成本。</li>
-<li>性能降低：请求数据经过多层代码处理，执行时间变长，性能会有所消耗。</li>
-<li>代码复杂度增加：因为层与层之间存在强耦合，因此一些组合功能的调用，需要增加很多层之间的相互调用。</li>
-</ul>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/25/2021-07-25Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E5%88%86%E5%B1%82%E6%80%9D%E7%BB%B4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -466,60 +343,14 @@
       
           <p>组合思维可以说是来自于Unix的设计哲学：<strong>主张组合设计，而不是单体设计；主张使用集体智慧，而不是某个人的特殊智慧</strong>。</p>
 <p>Unix哲学发展至今，诞生了无数优秀的设计原则和最佳实践。其中，对于编程来说，最有价值的原则就是 Peter H. Salus 总结的三条原则：</p>
-<ul>
-<li>编写可以做一件事并且做的很好的程序。</li>
-<li>编写程序以协同工作。</li>
-<li>编写程序来处理文本流，因为这是一个通用接口。</li>
-</ul>
-<p>这三条规则可以理解为：<strong>简单完备性、组合思维和数据驱动</strong>。</p>
-<h4 id="1-简单完备性"><a href="#1-简单完备性" class="headerlink" title="1. 简单完备性"></a>1. 简单完备性</h4><p>这其实就是 “ 简单原则 ”，其宗旨就是：<strong>一个程序只做一件事，并且做得很好</strong>。</p>
-<p>这条原则的主要的作用就是能够极大地减低软件复杂度。</p>
-<h5 id="1-1-软件复杂度"><a href="#1-1-软件复杂度" class="headerlink" title="1.1 软件复杂度"></a>1.1 软件复杂度</h5><p>问题来了，什么是软件复杂度。</p>
-<blockquote>
-<p>软件复杂度（区别于计算复杂度）是对影响软件内部关联关系的属性的描述。<br>                                                      —— Manny Lehman 《软件演进法则》</p>
-</blockquote>
-<p>其实就是，代码之间的互相影响越多，软件就越复杂。</p>
-<p>软件复杂度一般来自三方面：</p>
-<ul>
-<li><strong>代码库规模：</strong> 代码库规模越大，通常越复杂，但代码行数和复杂度并不是正相关。比如，同样的类库， Java 代码类库 通常会比 C++ 类库的代码行数更多，其实是由于语言特性导致，并不一定更复杂。</li>
-<li><strong>技术复杂度：</strong> 也就是不同的编程语言、服务架构等对于开发人员理解的难易度。</li>
-<li><strong>实现复杂度</strong>：不同开发，对于需求理解不同，代码实现就不同。</li>
-</ul>
-<h5 id="1-2-如何降低代码复杂度？"><a href="#1-2-如何降低代码复杂度？" class="headerlink" title="1.2 如何降低代码复杂度？"></a>1.2 如何降低代码复杂度？</h5><ul>
-<li><p><strong>代码库规模：减少硬编码来控制代码量</strong>。</p>
-<p>比如，以策略模式替代大量 if-else；使用工具类减少从重复代码调用；语言特性的一些类库，如 Java 8 的 lambda 表达式。</p>
-</li>
-<li><p><strong>技术复杂度：在设计时做好技术选型</strong>。</p>
-<p>简单来讲，系统设计时要确认好技术方案，是否会引入过于复杂的组件，或是否存在过渡设计；确认系统设计方案的后续可维护工作，是否存在过高的学习成本等等。</p>
-</li>
-<li><p><strong>实现复杂度：使用统一的代码规范。</strong></p>
-<p>使用同一套编码规范，能够尽量统一不同开发之间的编程风格，减少适应代码风格的维护成本。</p>
-</li>
-</ul>
-<h4 id="2-组合思维"><a href="#2-组合思维" class="headerlink" title="2. 组合思维"></a>2. 组合思维</h4><h5 id="2-1-为什么需要组合思维？"><a href="#2-1-为什么需要组合思维？" class="headerlink" title="2.1 为什么需要组合思维？"></a>2.1 为什么需要组合思维？</h5><p>开发时，即使在项目前期做了大量的准备工作，也不能完全比需求的变化，一旦需求发生变化，往往就意味着代码要发生变更。</p>
-<p>那么，组合思维就显得十分重要，<strong>把软件设计成独立组件并能随意组合，才能真正应对不断变化的需求</strong>。</p>
-<h5 id="2-2-如何做到组合思维？"><a href="#2-2-如何做到组合思维？" class="headerlink" title="2.2 如何做到组合思维？"></a>2.2 如何做到组合思维？</h5><ul>
-<li><p><strong>解耦</strong>：代码依赖关系越多，就越复杂，只有将代码不断拆分，才更容易理解它们之间的关系。</p>
-<p>其实，就是常说的设计时要尽量分离接口与实现，程序应耦合在标准和规范上，而不是耦合在具体代码实现逻辑上。</p>
-</li>
-<li><p><strong>模块化</strong>：模块化的深层含义是<strong>可替换的一致性</strong>。</p>
-<p>比如，想使用 RPC 协议，可以选择 Dubbo 、gRPC 等框架，这两个框架的基础是 RPC 协议，无非只是实现的组件框架不同，可以互相替换，实现的功能是一致的。</p>
-<p>也就是说，一致性指的是不同框架通过实现同一个功能来保持功能的一致性。</p>
-</li>
-</ul>
-<p>上面说了那么多，其实就是老生畅谈的<strong>高内聚、低耦合</strong>，<strong>模块内部尽量聚合以保持功能的一致性，模块外部尽量通过标准来耦合</strong>。</p>
-<p>简单来说，通过提供机制而不是策略，来保证软件的自由组合，每次需求的修改，仅仅是策略调整，不需要更改整个系统机制。</p>
-<h4 id="3-数据思维"><a href="#3-数据思维" class="headerlink" title="3. 数据思维"></a>3. 数据思维</h4><p>目前的互联网应用中，绝大部分都是数据密集型，而不是计算密集型。</p>
-<p>也就是说，设计时，做重要的是要彻底了解这个需求的数据是什么：如何组织数据结构，如何产生数据、如何处理数据、如何存储数据、如何展示数据、如何删除数据。</p>
-<p>简单来说，就是<strong>数据驱动编程：编程中重要的是数据结构，而不是算法。</strong></p>
-<p>因为灰度发布和客户端程序版本升级的问题，当数据结构发生变化时（添加数据库字段等），往往会出现新旧代码及新旧数据格式在线上环境共存的问题，因此，要考虑数据的兼容性。</p>
-<p>数据驱动编程，意味着需要把代码和代码作用的数据结构拆分，来达到改变程序逻辑时，仅需编辑数据结构，减少代码修改的目的。</p>
-<p>简单来说，就是设计时需要考虑数据本身能支持哪些场景？</p>
-<p>是否需要预留接口功能或抽象相关模块，避免一次性代码的产生，每次需求变更都要出现大量代码变更，也就是设计时要以解决数据变化为中心，而不是仅关心当前需求对于数据的要求。</p>
-<blockquote>
-<p> 参考资料：<br> 《趣学设计模式》<a target="_blank" rel="noopener" href="https://kaiwu.lagou.com/course/courseInfo.htm?courseId=710#/detail/pc?id=6863">https://kaiwu.lagou.com/course/courseInfo.htm?courseId=710#/detail/pc?id=6863</a></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/10/2021-07-10Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94Unix%E5%93%B2%E5%AD%A6%E5%92%8C%E7%BB%84%E5%90%88%E6%80%9D%E7%BB%B4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -587,52 +418,14 @@
       
           <p>在 “ 什么是对象引用 ” 中，我们知道了对象和对象引用的关系，在栈中的对象引用指向堆中的对象。</p>
 <p>方法调用结束后，栈中的引用会被清空，但存活于堆中的对象，不会随着方法调用的结束而被清除，因此进程空间可能会被不断创建的对象占满。</p>
-<p>Java 中建立了垃圾回收机制来清除不再被使用的对象。</p>
-<p>垃圾回收的基本原则是，当存在对象引用指向某个对象时，该对象不会被回收；当没有任何引用指向某个对象时，该对象会回收。</p>
-<p>但在某些情况下，我们会希望有些对象不需要被立即回收，或者说从全局来看没有被回收的必要。比如缓存系统的设计，为了提高运行效率，一些未被使用的缓存对象仍可再堆中存活，无需立即回收。</p>
-<p>为了满足这种要求，JDK 1.2 版本开始，Java 将对象的引用细分为强引用、软引用、弱引用和虚引用四种级别。</p>
-<p>细分的准则是体现在被 GC 回收的优先级上：强引用 ＞ 软引用 ＞ 弱引用 ＞ 虚引用。</p>
-<h4 id="4-1-强引用"><a href="#4-1-强引用" class="headerlink" title="4.1 强引用"></a>4.1 强引用</h4><p>强引用表示一个对象处于 “ 有用、必须 ” 的状态，是最传统的引用的定义，也就是在程序代码中普遍存在的引用赋值。</p>
-<p>如果一个对象具有强引用，那么垃圾回收器绝不会回收。</p>
-<p>即使内存空间不足，Java 虚拟机会抛出 <code>OutOfMemoryError</code> 错误，使得程序异常终止，也不会通过回收强引用对象来解决内存不足的问题。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br></pre></td></tr></table></figure>
-
-<p>后面三种对象引用都是基于强引用，也就是说，必须先存在一个强引用的对象，然后对这个对象做一些操作，将它变成其他对象引用。</p>
-<h4 id="4-2-软引用"><a href="#4-2-软引用" class="headerlink" title="4.2 软引用"></a>4.2 软引用</h4><p>软引用表示一个对象处于 “ 有用、但非必须 ” 的状态。</p>
-<p>软引用关联着的对象，在系统将要发生内存溢出异常前，才会将这些对象列入回收范围之中进行第二次回收，如果还没有足够的内存，Java 虚拟机才会抛出 <code>OutOfMemoryError</code> 错误。</p>
-<p>JDK 1.2 之后提供了 <code>SoftReference</code> 来实现软引用：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br><span class="line"><span class="type">SoftReference</span> <span class="variable">softReference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SoftReference</span>(phone);</span><br></pre></td></tr></table></figure>
-
-<p>软引用可以用来实现内存敏感的高速缓存。</p>
-<p>将软引用和一个引用队列联合使用，如果软引用引用的对象被垃圾回收器回收，Java 虚拟机会将这个软引用加到与之关联的引用队列中，以便在恰当的时机将该软引用回收。</p>
-<p>但由于 GC 线程的优先级较低，通常手动调用 <code>System.gc()</code> 并不会立即执行 GC ，因此软引用所引用的对象并不一定会被立马回收。</p>
-<p>因此，通过检查引用队列的方式判断软引用对象是否被回收，从而实现一个具有可用性的高速缓存。</p>
-<p>示例：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br><span class="line"><span class="type">SoftReference</span> <span class="variable">phoneRef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SoftReference</span>(phone);</span><br><span class="line"><span class="comment">// 使用结束</span></span><br><span class="line">phone = <span class="literal">null</span>;</span><br><span class="line"><span class="comment">// 再次获取强引用，注意此时 phoneRef.get() 可能为 null</span></span><br><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> (Phone) phoneRef.get();</span><br><span class="line"><span class="comment">// 引入引用队列</span></span><br><span class="line"><span class="type">ReferenceQueue</span> <span class="variable">queue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReferenceQueue</span>();</span><br><span class="line"><span class="type">SoftReference</span> <span class="variable">phoneRef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SoftReference</span>(phone, queue); </span><br><span class="line"><span class="comment">// 根据引用队列清除被回收的软引用对象</span></span><br><span class="line"><span class="type">SoftReference</span> <span class="variable">phoneRef</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">while</span> ((phoneRef = (Phone) queue.poll()) != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 清除软引用对象</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="4-3-弱引用"><a href="#4-3-弱引用" class="headerlink" title="4.3 弱引用"></a>4.3 弱引用</h4><p>弱引用表示一个对象处于 “ 可能有用，但非必须 ” 的状态。</p>
-<p>类似于软引用，但弱引用的级别比软引用更弱。</p>
-<p>弱引用关联的对象只能生存到下一次垃圾回收发生为止。一旦垃圾回收器开始工作，无论当前内存是否足够，都会回收掉弱引用关联的对象。</p>
-<p>也就是说， GC 线程在扫描它所管辖的内存区域时，一旦发现只具有弱引用的对象，就会进行回收。但由于 GC 是一个优先级较低的线程，因此不一定会很快发现这些只具有弱引用的对象。</p>
-<p>弱引用同样可以和一个引用队列联合使用，如果弱引用所引用的对象被垃圾回收器回收，Java 虚拟机就会把这个弱引用加入到与之关联的引用队列中。</p>
-<p>JDK 1.2 之后提供了 <code>WeakReference</code> 来实现弱引用：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br><span class="line"><span class="type">WeakReference</span> <span class="variable">wealReference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">WeakReference</span>(phone);</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-4-虚引用"><a href="#4-4-虚引用" class="headerlink" title="4.4 虚引用"></a>4.4 虚引用</h4><p>虚引用表示一个对象处于 “ 无用” 的状态，意味着等同于没有引用，随时可能被 GC 回收，也被称为 “ 幽灵引用 ” 或者 “ 幻影引用 ”，是最弱的一种引用关系。</p>
-<p>一个对象是否由虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来获取一个对象实例。</p>
-<p>对一个对象设置虚引用的唯一目的是为了能在这个对象被垃圾回收器回收时收到一个系统通知。</p>
-<p>JDK 1.2 之后提供了 <code>PhantomReference</code> 来实现弱引用：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br><span class="line"><span class="type">ReferenceQueue</span> <span class="variable">referenceQueue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ReferenceQueue</span>();</span><br><span class="line"><span class="type">PhantomReference</span> <span class="variable">phantomReference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PhantomReference</span>(phone, queue);</span><br></pre></td></tr></table></figure>
-
-<p>虚引用和弱引用的区别在于：虚引用的使用必须和引用队列联合使用。</p>
-<p>也就是说，GC 在回收一个对象时，如果发现对象具有虚引用，那么回收之前就会先将该对象的虚引用加入到与之关联的引用队列中。</p>
-<p>程序可以通过判断引用队列中是否已经加入虚引用来了解被引用的对象是否将要被 GC 回收，如果发现某个虚引用已经被加入引用队列，就可以在所引用对象的内存被回收之前采取必要的处理操作。</p>
-<blockquote>
-<p>参考资料：</p>
-<p>《深入理解 Java 虚拟机》</p>
-<p>Java 四种对象引用：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/yanggb/p/10386175.html">https://www.cnblogs.com/yanggb/p/10386175.html</a></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/24/2021-06-24Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E4%B8%80%E6%96%87%E8%AE%B2%E8%A7%A3%20Java%E5%9B%9B%E7%A7%8D%E5%AF%B9%E8%B1%A1%E5%BC%95%E7%94%A8%EF%BC%9A%E5%BC%BA%E5%BC%95%E7%94%A8%E3%80%81%E8%BD%AF%E5%BC%95%E7%94%A8%E3%80%81%E5%BC%B1%E5%BC%95%E7%94%A8%E3%80%81%E8%99%9A%E5%BC%95%E7%94%A8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -699,56 +492,14 @@
 
       
           <h3 id="1-什么是对象？"><a href="#1-什么是对象？" class="headerlink" title="1. 什么是对象？"></a>1. 什么是对象？</h3><p>任何事物都可以作为一个对象，一台电脑、一部手机等等等等。</p>
-<p>在面向对象程序设计的 Java 中，程序是由对象组成的，对象包含了描述其状态的数据（属性）和可以执行的操作（方法），因此，每个对象都可以表示具体的事物或者抽象的规则、计划或事件。</p>
-<p>类是构造对象的模板或蓝图，可以将类比作制造手机的流水线，而对象就是一台台手机。</p>
-<p>由类构造对象的过程被称为创建类的实例，因此，也可以把对象称作实例。</p>
-<h3 id="2-什么是对象引用？"><a href="#2-什么是对象引用？" class="headerlink" title="2. 什么是对象引用？"></a>2. 什么是对象引用？</h3><blockquote>
-<p>每种语言都有自己的数据处理方式，因此，必须注意将要处理的数据是什么类型。</p>
-<p>直接操作元素？还是某种基于特殊语法的间接表示（例如 C/C++ 的指针）来操作对象。</p>
-<p>所有这些在 Java 中都进行了简化，一切都被视为对象。因此，可以采用一种统一的语法。</p>
-<p>尽管将一切都 “ 看作 ” 对象，但操作的标识符实际是指向一个对象的 “ 引用 ”。<br>                                                                                                ——《Java 编程思想》</p>
-</blockquote>
-<p>Java 中创建的对象都被放在成为 “ 堆 ” 的系统存储区中，对象都通过 “ 对象引用 ” 来访问。</p>
-<p>一个类的变量持有一个对象，实际上是对该对象的引用。当变量不在引用任何对象时，该对象的引用就为 “ null ”。</p>
-<p>具体来解释一下对象的创建：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br></pre></td></tr></table></figure>
-
-<p>通常会认为 <code>phone</code> 就是 <code>Phone</code> 类的对象。<strong>实际上</strong>，<code>phone</code> 是创建 <code>Phone</code>  类的对象的引用。</p>
-<p>这个表述实际上执行的操作：</p>
-<ol>
-<li><code>new Phone()</code> 是在内存中为对象开辟空间。其实也就是 <code>new</code>  关键字表示在内存的 <strong>堆（heap）</strong> 上为对象开辟空间，该空间保存了对象的属性和方法。</li>
-<li><code>Phone phone</code> ：<code>phone</code> 指代一个 <code>Phone</code> 对象，被称为 <strong>对象引用</strong>。<strong>实际上</strong>，<code>phone</code> 并不是对象本身，而是一个类似执行对象的指针。<code>phone</code> 存在于内存的 <strong>栈（stack）</strong> 中。</li>
-<li>当用等号赋值时，是将右侧 <code>new Phone()</code> 在堆中创建对象的地址赋给对象引用 <code>phone</code> 。</li>
-</ol>
-<p>为什么要这样操作？简单来讲，有以下几种优点：</p>
-<ol>
-<li><p>栈的读取速度比堆块，但栈上存储的数据受到有效范围的限制。</p>
-</li>
-<li><p>一个对象引用可以赋值给另一个对象引用，此时复制的实际上是对象的地址。因此，一个对象可以由多个对象引用，减少对内存的消耗。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>();</span><br><span class="line">Phone phone2;</span><br><span class="line">phone2 = phone1; <span class="comment">// phone1 与 phone2 引用的是同一个对象，对phone1修改，phone2也会随之修改</span></span><br></pre></td></tr></table></figure></li>
-</ol>
-<h3 id="3-对象引用意味着-Java-是按引用传递？"><a href="#3-对象引用意味着-Java-是按引用传递？" class="headerlink" title="3. 对象引用意味着 Java 是按引用传递？"></a>3. 对象引用意味着 Java 是按引用传递？</h3><p> 首先回顾一下，将参数传递给方法的两种情况：</p>
-<ul>
-<li>按值调用：表示方法接收的是调用者提供的值。</li>
-<li>按引用调用：表示方法接收的是调用者提供的变量地址。</li>
-</ul>
-<p>一个方法可以修改传递引用所对应的变量值，而不能修改传递值调用所对应的变量值。</p>
-<p>方法参数有两种类型：</p>
-<p><strong>基本数据类型</strong>：不能修改值调用所对应的变量值。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">    a = a + b; <span class="comment">// a = 3</span></span><br><span class="line">&#125; </span><br><span class="line"><span class="type">int</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">add(a, b);</span><br><span class="line"><span class="comment">// a = 1</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>对象引用</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Phone</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Double price;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">discount</span><span class="params">()</span> &#123;</span><br><span class="line">        price = price * <span class="number">0.7</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">Phone</span> <span class="variable">phone1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>(<span class="number">2000.00</span>);</span><br><span class="line">phone1.discount();</span><br><span class="line">System.out.println(phone1.getPrice()); <span class="comment">// 1400.00</span></span><br></pre></td></tr></table></figure>
-
-<p>从结果来看，似乎方法已经修改了 <code>phone</code> 的 <code>price</code>，变量值已经发生了改变。</p>
-<p><strong>实际上</strong>，方法拿到的是 <code>phone</code> 对象引用的拷贝，也就是复制了一个对象地址，因此方法中对<code>phone</code> 属性  <code>price</code> 的修改，也会会作用 <code>phone1</code> 对象引用上。</p>
-<p>那么，方法是否能改变对象引用的地址呢？</p>
-<p>实际操作一下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Phone</span> <span class="variable">phone1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Phone</span>(<span class="number">2000.00</span>);</span><br><span class="line">modifyPhone(phone1);</span><br><span class="line">System.out.println(phone1.getPrice()); <span class="comment">// 2000.00</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">modifyPhone</span><span class="params">(Phone phone)</span> &#123;</span><br><span class="line">    phone = <span class="keyword">new</span> <span class="title class_">Phone</span>(<span class="number">1000.00</span>);</span><br><span class="line">    System.out.println(phone.getPrice()); <span class="comment">// 1000.00</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>结果很明显，<strong>方法是不能改变对象引用的地址</strong>。</p>
-<p>换句话说，<strong>Java 程序设计语言总是按值调用</strong>。不要被 “ 对象引用 ” 这四个字迷惑了双眼，<strong>错误</strong>地人文 Java 对对象采用的是引用调用。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/22/2021-06-22Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E4%BB%80%E4%B9%88%E6%98%AF%E5%AF%B9%E8%B1%A1%E5%BC%95%E7%94%A8%EF%BC%9F%E6%8C%89%E5%80%BC%E4%BC%A0%E9%80%92%20OR%20%E6%8C%89%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -816,126 +567,14 @@
       
           <p>Java 是一种强类型语言，也就是说必须为每一个变量声明一种类型。</p>
 <p>在 Java 中，一共有 8 种基本类型，其中有 4 种整形、2 种浮点类型、1种表示 Unicode 编码的字符单元类型 char 和 1 种表示真值的 boolean 类型。</p>
-<hr>
-<h3 id="1-整型"><a href="#1-整型" class="headerlink" title="1. 整型"></a>1. 整型</h3><p>整型用于表示没有小数部分的数值，允许负数的出现。</p>
-<h4 id="取值范围"><a href="#取值范围" class="headerlink" title="取值范围"></a>取值范围</h4><table>
-<thead>
-<tr>
-<th>类型</th>
-<th>存储需求</th>
-<th>取值范围</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>int</td>
-<td>4 字节</td>
-<td>-21 4748 3648 ~ 21 4749 3647 （超过20亿）</td>
-</tr>
-<tr>
-<td>short</td>
-<td>2 字节</td>
-<td>-3 2768 ~ 32767</td>
-</tr>
-<tr>
-<td>long</td>
-<td>8 字节</td>
-<td>- 922 3372 0368 5477 5808 ~922 3372 0368 5477 5807（超过920万兆）</td>
-</tr>
-<tr>
-<td>byte</td>
-<td>1 字节</td>
-<td>-128 ~ 127</td>
-</tr>
-</tbody></table>
-<p>长整型（long）数值后有一个后缀 L 或 l，如 123456L。</p>
-<p>十六进制数值前有一个前缀 0X 或 0x，如 0xCAFE。</p>
-<p>Java 7 开始，加上前缀 0B 或 0b 就可以表示二进制数，如 0b001 即 9。</p>
-<p>同时，可以为数字字面量加下划线，如用 1_000_000 （或 0b1111_0100_0010_0100_0000）表示一百万。这些下划线仅为易读性考虑，编译器会自动去除。</p>
-<p>注：Java 中，没有任何无符号形式的 int 、long、short 或 byte 类型。</p>
-<hr>
-<h3 id="2-浮点类型"><a href="#2-浮点类型" class="headerlink" title="2. 浮点类型"></a>2. 浮点类型</h3><p>浮点类型用于表示小数部分的数值。</p>
-<h4 id="取值范围-1"><a href="#取值范围-1" class="headerlink" title="取值范围"></a>取值范围</h4><table>
-<thead>
-<tr>
-<th>类型</th>
-<th>存储需求</th>
-<th>取值范围</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>float</td>
-<td>4 字节</td>
-<td>大约 ± 3.40282347E+38F（有效位数 6~7 位）</td>
-</tr>
-<tr>
-<td>double</td>
-<td>8 字节</td>
-<td>大约 ± 1.79769313486231570E+308（有效位数 15 位）</td>
-</tr>
-</tbody></table>
-<p>double 类型的数值精度是 float 类型的两倍，因此也被称为双精度数值。</p>
-<p>float 类型的数值有一个后缀 F 或 f，如 3.14F，无后缀 F 的浮点类型默认为 double 类型。当然也可以在浮点类型添加后缀 D 或 d。</p>
-<h4 id="特殊说明"><a href="#特殊说明" class="headerlink" title="特殊说明"></a>特殊说明</h4><p>浮点类型会出现舍入误差，如 2.0 - 1.1 = 0.8999999999999999，而不是 0.9。</p>
-<p>这种舍入误差的主要原因是浮点数值采用二进制系统表示，而二进制系统无法精确地表示分数 1/10，类似于十进制无法精确表示分数 1/3如果数值计算中不允许出现任何这种误差，应该使用 BigDecimal 类。</p>
-<hr>
-<h3 id="3-char类型"><a href="#3-char类型" class="headerlink" title="3. char类型"></a>3. char类型</h3><p>char 类型原本用于表示单个字符。</p>
-<p>但如今，有些 Unicode 字符可以用一个 char 值表示，另外一些 Unicode 字符需要两个 char值。</p>
-<p>char 类型的字面量值要用单引号括住。如 ‘A’ 是编码值 65 所对应的字符常量。</p>
-<p>它与 “A” 不同， “A” 是包含一个字符 A 的字符串。</p>
-<p>char 类型的值可以表示十六进制，其范围从 \u0000 到 \Uffff。</p>
-<p>除了转义字符 \u 外，还有一些用于表示特殊字符的转义序列。</p>
-<p>这些转义序列都可以出现在加引号的字符字面量或字符串中。如 ‘\u2122’ 或 ‘hello\n’。</p>
-<p>转义序列 \u 还可以出现在加引号的字符常量或自负床之外（其他转义序列不可以）。</p>
-<p>例如 <code>public static void main(String\u005B\u005D args)</code>，这符合语法规则，因为 <code>\u005B</code>、 <code>\u005D</code> 分别对应 <code>[</code> 、 <code>]</code>。</p>
-<h4 id="特殊字符的转义序列"><a href="#特殊字符的转义序列" class="headerlink" title="特殊字符的转义序列"></a>特殊字符的转义序列</h4><table>
-<thead>
-<tr>
-<th>转义序列</th>
-<th>名称</th>
-<th>Unicode 值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>\b</td>
-<td>退格</td>
-<td>\u0008</td>
-</tr>
-<tr>
-<td>\t</td>
-<td>制表</td>
-<td>\u0009</td>
-</tr>
-<tr>
-<td>\n</td>
-<td>换行</td>
-<td>\u000a</td>
-</tr>
-<tr>
-<td>\r</td>
-<td>回车</td>
-<td>\u000d</td>
-</tr>
-<tr>
-<td>\ “</td>
-<td>双引号</td>
-<td>\u0022</td>
-</tr>
-<tr>
-<td>\ ‘</td>
-<td>单引号</td>
-<td>\u0027</td>
-</tr>
-<tr>
-<td>\ \</td>
-<td>反斜杠</td>
-<td>\u005c</td>
-</tr>
-</tbody></table>
-<h4 id="特殊说明-1"><a href="#特殊说明-1" class="headerlink" title="特殊说明"></a>特殊说明</h4><p>Unicode 转义字符会在解析代码前处理，如 <code>\u0022+\u0022</code> 会被解析为 <code>&quot;&quot;+&quot;&quot;</code>。</p>
-<hr>
-<h4 id="4-boolean-类型"><a href="#4-boolean-类型" class="headerlink" title="4. boolean 类型"></a>4. boolean 类型</h4><p>boolean（布尔）类型有两个值：<code>false</code> 和 <code>true</code> ，用来判断逻辑条件。</p>
-<p>注：整型值和布尔值之间不能相互转换。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/19/2021-06-11Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1002,120 +641,14 @@
 
       
           <h3 id="1-对象包装器"><a href="#1-对象包装器" class="headerlink" title="1. 对象包装器"></a>1. 对象包装器</h3><p>某些情况下，基本类型如 <code>int</code> 需要转换为对象。</p>
-<p>因此，在 Java 中，所有的基本类型都有一个与之对应的类，通常，这些类被称为包装器。</p>
-<p><img src="https://img-blog.csdnimg.cn/20210619213953678.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="对象包装器"></p>
-<p>对象包装器类是不可变的，也就是说，一旦构造了包装器，就不允许改变包装在其中的值。</p>
-<p>同时包装器类还是 <code>final</code> ，因此，不能定义包装器类的字类。</p>
-<p>注意：由于包装器类引用可以为 <code>null</code>， 因此自动装箱可能会抛出 <code>NullPointException</code> 异常：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">n</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">System.out.println(<span class="number">2</span> * n); <span class="comment">// Throws NullPointerException</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="2-自动装箱与拆箱"><a href="#2-自动装箱与拆箱" class="headerlink" title="2. 自动装箱与拆箱"></a>2. 自动装箱与拆箱</h3><h4 id="2-1-什么是自动装箱与拆箱？"><a href="#2-1-什么是自动装箱与拆箱？" class="headerlink" title="2.1 什么是自动装箱与拆箱？"></a>2.1 什么是自动装箱与拆箱？</h4><p><strong>自动装箱</strong>：将一个基本类型赋值给一个对应的包装器对象。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">number</span> <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
-<p>编译器会自动将上述语句转换为：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">number</span> <span class="operator">=</span> Integer.valueOf(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-
-<p><strong>自动拆箱</strong>：将一个包装器对象付给一个对应的基本类型。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> number;</span><br></pre></td></tr></table></figure>
-
-<p>编译器会自动将上述语句转换为：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> number.intValue();</span><br></pre></td></tr></table></figure>
-
-<p>在算术表达式中，出现基本数据类型与包装器对象进行运算时，编译器会自动插入对象拆箱的指令，对基础数据类型计算后，再将结果装箱。</p>
-<p>此时，表达式中出现混用 <code>Integer</code> 和 <code>Double</code> 类型，<code>Intege</code>r 值会拆箱，提升为 <code>Double</code>，再封箱为 <code>Double</code>：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">n</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="type">Double</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">2.0</span>;</span><br><span class="line">System.out.println(<span class="literal">true</span> ? n : d); <span class="comment">// 1.0</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>注意</strong></p>
-<ol>
-<li><p>装箱和拆箱是编译器认可的，而不是虚拟机。编译器在生成类的字节码时，会插入必要的方法调用。虚拟机只是执行这些字节码。</p>
-</li>
-<li><p>自动拆箱陷阱：注意包装器对象是否为 null。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">i</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"><span class="type">int</span> <span class="variable">n</span> <span class="operator">=</span> i; <span class="comment">// Throws NullPointerException</span></span><br></pre></td></tr></table></figure>
-
-<p>由于 <code>i</code> 为对象，可以指向 <code>null</code>，但运行时，会对 <code>i</code> 进行拆箱，也就是对一个空对象执行 <code>intValue()</code> 方法，因此会抛出空指针异常。</p>
-</li>
-</ol>
-<h4 id="2-2-比较问题"><a href="#2-2-比较问题" class="headerlink" title="2.2 比较问题"></a>2.2 比较问题</h4><h5 id="2-1-包装器对象之间的比较"><a href="#2-1-包装器对象之间的比较" class="headerlink" title="2.1 包装器对象之间的比较"></a>2.1 包装器对象之间的比较</h5><p>基于对象对比机制可知，<code>==</code> 检测的实际是对象是否指向同一块存储区域，因此，不同对象之间的比较一般不相等。</p>
-<p>而包装器类的特殊实现，会导致不同对象指向同一块存储区域，从而出现以下情况。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">1</span>; </span><br><span class="line">System.out.println(a == b); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="type">Integer</span> <span class="variable">c</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">1000</span>;</span><br><span class="line">System.out.println(c == d); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
-
-<p>为什么会出现这种情况，根据自动装箱可知</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
-
-<p>实际执行了</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> Integer.valueOf(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
-
-<p>查看 <code>Integer</code> 源码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Integer <span class="title function_">valueOf</span><span class="params">(<span class="type">int</span> i)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high)</span><br><span class="line">        <span class="keyword">return</span> IntegerCache.cache[i + (-IntegerCache.low)];</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Integer</span>(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据源码发现，传入的 <code>int</code> 值 在一定范围内是不会自动创建的，而是一个 <code>IntegerCache</code> 类的 <code>cache</code> 数组属性，因此，在一定范围内，<code>Integer</code> 包装器的对象返回的是同一个 <code>Integer</code> 对象，此时，<code>==</code>  成立。</p>
-<p>查看 <code>IntegerCache</code> 源码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">IntegerCache</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">low</span> <span class="operator">=</span> -<span class="number">128</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> high;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> Integer[] cache;</span><br><span class="line">    <span class="keyword">static</span> Integer[] archivedCache;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="comment">// high value may be configured by property</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">h</span> <span class="operator">=</span> <span class="number">127</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">integerCacheHighPropValue</span> <span class="operator">=</span></span><br><span class="line">            VM.getSavedProperty(<span class="string">&quot;java.lang.Integer.IntegerCache.high&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (integerCacheHighPropValue != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                h = Math.max(parseInt(integerCacheHighPropValue), <span class="number">127</span>);</span><br><span class="line">                <span class="comment">// Maximum array size is Integer.MAX_VALUE</span></span><br><span class="line">                h = Math.min(h, Integer.MAX_VALUE - (-low) -<span class="number">1</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span>( NumberFormatException nfe) &#123;</span><br><span class="line">                <span class="comment">// If the property cannot be parsed into an int, ignore it.</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        high = h;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Load IntegerCache.archivedCache from archive, if possible</span></span><br><span class="line">        VM.initializeFromArchive(IntegerCache.class);</span><br><span class="line">        <span class="type">int</span> <span class="variable">size</span> <span class="operator">=</span> (high - low) + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Use the archived cache if it exists and is large enough</span></span><br><span class="line">        <span class="keyword">if</span> (archivedCache == <span class="literal">null</span> || size &gt; archivedCache.length) &#123;</span><br><span class="line">            Integer[] c = <span class="keyword">new</span> <span class="title class_">Integer</span>[size];</span><br><span class="line">            <span class="type">int</span> <span class="variable">j</span> <span class="operator">=</span> low;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; c.length; i++) &#123;</span><br><span class="line">                c[i] = <span class="keyword">new</span> <span class="title class_">Integer</span>(j++);</span><br><span class="line">            &#125;</span><br><span class="line">            archivedCache = c;</span><br><span class="line">        &#125;</span><br><span class="line">        cache = archivedCache;</span><br><span class="line">        <span class="comment">// range [-128, 127] must be interned (JLS7 5.1.7)</span></span><br><span class="line">        <span class="keyword">assert</span> IntegerCache.high &gt;= <span class="number">127</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">IntegerCache</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据源码可知，值为<code>-128 ~ 127</code> 的 <code>Integer</code> 包装器对象引用的是同一缓存数字中的对象，因此，它们是相等的。</p>
-<p>其他的包装器类也有类似的缓存操作，为了避免多次创建对象，事先创造好了一个缓存数组，如果值在这个范围内，就会直接返回实现创建好的对象。</p>
-<p>但是，某个范围内的整型数值是有限的，而浮点数不是。</p>
-<p>因此， <code>Double</code> 、<code>Float</code> 类型就没有类似的缓存数组。</p>
-<table>
-<thead>
-<tr>
-<th>类型</th>
-<th>相同对象范围</th>
-<th>不同对象范围</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Integer</td>
-<td>-128 ~ 127</td>
-<td>i &gt;= 128 || i &lt; -128</td>
-</tr>
-<tr>
-<td>Short</td>
-<td>-128 ~ 127</td>
-<td>s &gt;=128 || s &lt; -128</td>
-</tr>
-<tr>
-<td>Character</td>
-<td>&lt; 128</td>
-<td>c &gt; 128</td>
-</tr>
-<tr>
-<td>Long</td>
-<td>-128 ~ 127</td>
-<td>l &gt;= 128 || i &lt; -128</td>
-</tr>
-<tr>
-<td>Byte</td>
-<td>全部</td>
-<td>无</td>
-</tr>
-<tr>
-<td>Boolean</td>
-<td>全部</td>
-<td>无</td>
-</tr>
-<tr>
-<td>Double</td>
-<td>无</td>
-<td>全部</td>
-</tr>
-<tr>
-<td>Float</td>
-<td>无</td>
-<td>全部</td>
-</tr>
-</tbody></table>
-<h5 id="2-2-基础类型与包装器类的比较"><a href="#2-2-基础类型与包装器类的比较" class="headerlink" title="2.2 基础类型与包装器类的比较"></a>2.2 基础类型与包装器类的比较</h5><p><code>==</code> 比较运算符：</p>
-<ul>
-<li>当两个操作数都是包装器类的对象时，比较的是否为同一个对象。</li>
-<li>当其中一个是表达式时，则比较的是数值（会触发自动拆箱）。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Integer</span> <span class="variable">a</span> <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line"><span class="type">Integer</span> <span class="variable">b</span> <span class="operator">=</span> <span class="number">200</span>;</span><br><span class="line"><span class="type">Long</span> <span class="variable">c</span> <span class="operator">=</span> <span class="number">300l</span>;</span><br><span class="line"><span class="type">Long</span> <span class="variable">d</span> <span class="operator">=</span> <span class="number">200l</span>;</span><br><span class="line">System.out.println(c == (a+b)); <span class="comment">// true</span></span><br><span class="line">System.out.println(c.equals(a+b)); <span class="comment">// false</span></span><br><span class="line">System.out.println(c.equals(a+d)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
-
-<p>第一次，先触发自动拆箱，调用 <code>intValue()</code> 方法，比较数值是否相等，因此,结果为<code>true</code>。</p>
-<p>第二次，先触发自动拆箱，调用 <code>intValue()</code> 方法，再进行自动装箱，由于两个都为<code> Integer</code> 类型，自动装箱为 <code>Integer.valueof()</code> ，进行 <code>equals()</code> 比较时，类型不相等，因此，结果为 <code>false</code>。</p>
-<p>第三次，先触发自动拆箱，调用 <code>intValue()</code> 方法，再进行自动装箱，由于其中一个为 <code>Long</code> 类型，自动装箱变为 <code>Long.valueof()</code> ，进行 <code>equals()</code> 比较时，类型相等，数值相等，因此，结果为 <code>true</code>。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/06/19/2021-06-19Java%20%E5%BF%85%E7%9F%A5%E5%BF%85%E4%BC%9A%E2%80%94%E2%80%94%E4%B8%80%E6%96%87%E8%AF%A6%E8%A7%A3%E5%AF%B9%E8%B1%A1%E5%8C%85%E8%A3%85%E5%99%A8%E5%92%8C%E8%87%AA%E5%8A%A8%E8%A3%85%E7%AE%B1%E4%B8%8E%E6%8B%86%E7%AE%B1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1173,46 +706,14 @@
 
       
           <h3 id="安装前提"><a href="#安装前提" class="headerlink" title="安装前提"></a>安装前提</h3><p>Hexo是基于Node.js的一个博客框架，安装Hexo前需要安装Node.js。</p>
-<h3 id="安装Node-js"><a href="#安装Node-js" class="headerlink" title="安装Node.js"></a>安装Node.js</h3><p>Hexo官方文档使用cURL和Wget获取nvm（Node.js管理器）来安装Node.js，但腾讯云基础服务器1M/s的带宽下载太慢，推荐使用yum进行安装。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># yum install -y nodejs</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装Hexo"><a href="#安装Hexo" class="headerlink" title="安装Hexo"></a>安装Hexo</h3><p>使用npm安装Hexo：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># npm install -g hexo-cli</span><br></pre></td></tr></table></figure>
-
-<h3 id="新建用户（可忽略）"><a href="#新建用户（可忽略）" class="headerlink" title="新建用户（可忽略）"></a>新建用户（<em>可忽略</em>）</h3><p>安装Hexo完成后，执行<code>hexo init &lt;folder&gt;</code>命令即可初始化Hexo框架。但此时用户默认是root，之后通过域名访问站点文件夹时，需要开放root用户的部分权限（755），如果不希望开放此权限，可以新建用户在其家目录建立站点文件夹。</p>
-<h4 id="创建用户"><a href="#创建用户" class="headerlink" title="创建用户"></a>创建用户</h4><p>-m选项表示生成用户主目录</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># useradd -m yiyu</span><br></pre></td></tr></table></figure>
-
-<h4 id="添加密码"><a href="#添加密码" class="headerlink" title="添加密码"></a>添加密码</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># passwd yiyu</span><br></pre></td></tr></table></figure>
-
-<h4 id="赋予sudo权限"><a href="#赋予sudo权限" class="headerlink" title="赋予sudo权限"></a>赋予sudo权限</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># yum install -y vim</span><br><span class="line"># vim /etc/sudoers</span><br></pre></td></tr></table></figure>
-
-<p><code>/etc/sudoers</code>文件97行左右修改成如下格式：（<code>:wq!</code>退出）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">## Allow root to run any commands anywhere</span><br><span class="line">root	ALL=(ALL)	ALL</span><br><span class="line">yiyu	ALL=(ALL)	ALL	</span><br></pre></td></tr></table></figure>
-
-<h4 id="切换用户"><a href="#切换用户" class="headerlink" title="切换用户"></a>切换用户</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># su yiyu</span><br><span class="line">$ cd ~	</span><br></pre></td></tr></table></figure>
-
-<h4 id="创建站点文件夹"><a href="#创建站点文件夹" class="headerlink" title="创建站点文件夹"></a>创建站点文件夹</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir Codes</span><br><span class="line">$ cd Codes</span><br></pre></td></tr></table></figure>
-
-<h3 id="搭建Hexo博客"><a href="#搭建Hexo博客" class="headerlink" title="搭建Hexo博客"></a>搭建Hexo博客</h3><h4 id="初始化Hexo"><a href="#初始化Hexo" class="headerlink" title="初始化Hexo"></a>初始化Hexo</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir blog</span><br><span class="line">$ hexo init blog</span><br></pre></td></tr></table></figure>
-
-<h4 id="生成静态文件"><a href="#生成静态文件" class="headerlink" title="生成静态文件"></a>生成静态文件</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ cd blog</span><br><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<h4 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo yum install -y nginx</span><br></pre></td></tr></table></figure>
-
-<h4 id="配置server"><a href="#配置server" class="headerlink" title="配置server"></a>配置server</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo vim /etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>
-
-<p><code>http</code>块的<code>server</code>部分<code>root</code>后值修改为<code>/home/yiyu/Codes/blog/public</code></p>
-<h4 id="启动Nginx"><a href="#启动Nginx" class="headerlink" title="启动Nginx"></a>启动Nginx</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo service nginx start</span><br></pre></td></tr></table></figure>
-
-<h4 id="域名解析"><a href="#域名解析" class="headerlink" title="域名解析"></a>域名解析</h4><p>进入域名管理后，点击<code>新手快捷设置</code>,输入云主机公网IP，会自动设置两条记录，<code>@</code>和<code>www</code>，即可通过直接访问域名（<code>yiyufxst.me</code>），或添加www（<code>www.yiyufxst.me</code>），来访问博客。</p>
-<h4 id="设置权限"><a href="#设置权限" class="headerlink" title="设置权限"></a>设置权限</h4><p>由于权限问题，此时访问域名会返回403错误——服务器上文件或目录拒绝访问。</p>
-<p>修改博客根目录为755（rwxr-xr-x）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo chmod -R 755 /home/yiyu</span><br></pre></td></tr></table></figure>
-
-<p>再次访问域名，即可进入博客。</p>
-<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p><strong>Hexo官方文档</strong>：<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">https://hexo.io/zh-cn/docs/</a></p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/01/16/2017-01-16%E8%85%BE%E8%AE%AF%E4%BA%91(CentOS)%E6%90%AD%E5%BB%BAHexo%E9%9D%99%E6%80%81%E5%8D%9A%E5%AE%A2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
