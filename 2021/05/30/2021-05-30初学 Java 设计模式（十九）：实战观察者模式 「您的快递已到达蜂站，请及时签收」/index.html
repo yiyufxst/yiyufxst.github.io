@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yiyufxst.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、观察者模式介绍1. 解决的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初学 Java 设计模式（十九）：实战观察者模式 「您的快递已到达蜂站，请及时签收」">
+<meta property="og:url" content="http://yiyufxst.github.io/2021/05/30/2021-05-30%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E6%82%A8%E7%9A%84%E5%BF%AB%E9%80%92%E5%B7%B2%E5%88%B0%E8%BE%BE%E8%9C%82%E7%AB%99%EF%BC%8C%E8%AF%B7%E5%8F%8A%E6%97%B6%E7%AD%BE%E6%94%B6%E3%80%8D/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="一、观察者模式介绍1. 解决的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210530145134560.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2021-05-30T06:53:18.000Z">
+<meta property="article:modified_time" content="2021-05-30T06:53:18.000Z">
+<meta property="article:author" content="yiyufxst">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="观察者模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20210530145134560.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="http://yiyufxst.github.io/2021/05/30/2021-05-30%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E6%82%A8%E7%9A%84%E5%BF%AB%E9%80%92%E5%B7%B2%E5%88%B0%E8%BE%BE%E8%9C%82%E7%AB%99%EF%BC%8C%E8%AF%B7%E5%8F%8A%E6%97%B6%E7%AD%BE%E6%94%B6%E3%80%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>初学 Java 设计模式（十九）：实战观察者模式 「您的快递已到达蜂站，请及时签收」 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yiyufxst.github.io/2021/05/30/2021-05-30%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E6%82%A8%E7%9A%84%E5%BF%AB%E9%80%92%E5%B7%B2%E5%88%B0%E8%BE%BE%E8%9C%82%E7%AB%99%EF%BC%8C%E8%AF%B7%E5%8F%8A%E6%97%B6%E7%AD%BE%E6%94%B6%E3%80%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yiyufxst">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初学 Java 设计模式（十九）：实战观察者模式 「您的快递已到达蜂站，请及时签收」
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-30 14:53:18" itemprop="dateCreated datePublished" datetime="2021-05-30T14:53:18+08:00">2021-05-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="一、观察者模式介绍"><a href="#一、观察者模式介绍" class="headerlink" title="一、观察者模式介绍"></a>一、观察者模式介绍</h3><h4 id="1-解决的问题"><a href="#1-解决的问题" class="headerlink" title="1. 解决的问题"></a>1. 解决的问题</h4><p>主要解决将一个对象的状态改变通知给其他对象的问题。</p>
+<h4 id="2-定义"><a href="#2-定义" class="headerlink" title="2. 定义"></a>2. 定义</h4><p><strong>观察者模式</strong>是一种行为设计模式，允许你定义一种订阅机制，可在对象事件发生时通知多个 “观察” 该对象的其他对象。</p>
+<h4 id="3-应用场景"><a href="#3-应用场景" class="headerlink" title="3. 应用场景"></a>3. 应用场景</h4><ul>
+<li>当一个对象的改变需要改变其他对象，或实际对象时是事先未知的或动态变化时，可使用观察者模式。</li>
+<li>当应用中的一些对象必须观察其他对象时，可使用观察者模式，但仅能在有限时间内或特定情况下使用。</li>
+</ul>
+<h3 id="二、观察者模式优缺点"><a href="#二、观察者模式优缺点" class="headerlink" title="二、观察者模式优缺点"></a>二、观察者模式优缺点</h3><h4 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h4><ul>
+<li>开闭原则：无需修改发布者代码就能引入新的订阅者（如果是发布者接口，则可轻松引入发布者类）。</li>
+<li>可以在运行时建立与对象之间的联系。</li>
+</ul>
+<h4 id="2-缺点"><a href="#2-缺点" class="headerlink" title="2. 缺点"></a>2. 缺点</h4><ul>
+<li>订阅者的通知顺序是随机的。</li>
+</ul>
+<h3 id="三、观察者模式应用实例：您的快递已到达蜂站，请及时签收"><a href="#三、观察者模式应用实例：您的快递已到达蜂站，请及时签收" class="headerlink" title="三、观察者模式应用实例：您的快递已到达蜂站，请及时签收"></a>三、观察者模式应用实例：您的快递已到达蜂站，请及时签收</h3><h4 id="1-实例场景"><a href="#1-实例场景" class="headerlink" title="1. 实例场景"></a>1. 实例场景</h4><p>现在大部分快递都不会交付到手上了，除非我们特意选了上门服务。</p>
+<p>一般都是买完两三天，收到条短信：您好，您的快递已到蜂站，请凭取件码K16888取件，取件时间09:30-21:00，请及时取件。</p>
+<p>刚看完短信，APP也跳出一则通知：您的快递已被蜂站签收，请及时取件。</p>
+<p>今天，就以快递到达，同时收到APP和短信通知为例，介绍一下观察者模式。</p>
+<h4 id="2-观察者模式实现"><a href="#2-观察者模式实现" class="headerlink" title="2. 观察者模式实现"></a>2. 观察者模式实现</h4><h5 id="2-1-工程结构"><a href="#2-1-工程结构" class="headerlink" title="2.1 工程结构"></a>2.1 工程结构</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">observer-pattern</span><br><span class="line">└─ src</span><br><span class="line">    ├─ main</span><br><span class="line">    │	└─ java</span><br><span class="line">    │    └─ org.design.pattern.observer</span><br><span class="line">    │       ├─ model</span><br><span class="line">    │       │    ├─ ExpressPackage.java</span><br><span class="line">    │       │    ├─ Courier.java</span><br><span class="line">    │       │    └─ User.java</span><br><span class="line">    │       ├─ subscriber</span><br><span class="line">    │       │    ├─ ExpressEventSubscriber.java</span><br><span class="line">    │       │    └─ impl</span><br><span class="line">    │       │    	├─ AppExpressEventListener.java</span><br><span class="line">    │       │    	└─ SmsExpressEventSubscriber.java</span><br><span class="line">    │       ├─ publisher</span><br><span class="line">    │       │    └─ ExpressEventPublisher.java</span><br><span class="line">    │       └─ service</span><br><span class="line">    │            ├─ ExpressService.java</span><br><span class="line">    │            └─ impl</span><br><span class="line">    │                 └─ ExpressServiceImpl.java</span><br><span class="line">    └─ test</span><br><span class="line">    	└─ java</span><br><span class="line">            └─ org.design.pattern.observer.test</span><br><span class="line">      			└─ ExpressEventTest.java</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-代码实现"><a href="#2-2-代码实现" class="headerlink" title="2.2 代码实现"></a>2.2 代码实现</h5><h6 id="2-2-1-实体类"><a href="#2-2-1-实体类" class="headerlink" title="2.2.1 实体类"></a>2.2.1 实体类</h6><p><strong>快递实体类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Express</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 收件人名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String recipientName;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 收件人打电话</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String recipientPhone;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 收件人地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String recipientAddress;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-2-发布者"><a href="#2-2-2-发布者" class="headerlink" title="2.2.2 发布者"></a>2.2.2 发布者</h6><p><strong>快递事件发布者</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递事件发布者</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExpressEventPublisher</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递事件订阅者列表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;ExpressEventSubscriber&gt; subscriberList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 订阅快递事件</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> expressEventSubscriber 订阅者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">subscribe</span><span class="params">(ExpressEventSubscriber expressEventSubscriber)</span> &#123;</span><br><span class="line">        subscriberList.add(expressEventSubscriber);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取消订阅快递事件</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> expressEventSubscriber 订阅者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">unsubscribe</span><span class="params">(ExpressEventSubscriber expressEventSubscriber)</span> &#123;</span><br><span class="line">        subscriberList.remove(expressEventSubscriber);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 通知订阅者快递到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">notifySubscribersArrive</span><span class="params">(Express express)</span> &#123;</span><br><span class="line">        subscriberList.forEach(expressEventSubscriber -&gt; expressEventSubscriber.arrive(express));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-3-订阅者"><a href="#2-2-3-订阅者" class="headerlink" title="2.2.3 订阅者"></a>2.2.3 订阅者</h6><p><strong>快递事件订阅者接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递事件订阅者接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ExpressEventSubscriber</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">arrive</span><span class="params">(Express express)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>App-快递事件订阅者</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * App-快递事件订阅者</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppExpressEventListener</span> <span class="keyword">implements</span> <span class="title class_">ExpressEventSubscriber</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">arrive</span><span class="params">(Express express)</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;App 通知：您的包裹&#123;&#125;已达到蜂站！&quot;</span>, express.getId());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>短信-快递事件订阅者</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 短信-快递事件订阅者</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SmsExpressEventSubscriber</span> <span class="keyword">implements</span> <span class="title class_">ExpressEventSubscriber</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">arrive</span><span class="params">(Express express)</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;短信通知：您的包裹&#123;&#125;已达到蜂站！&quot;</span>, express.getId());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-4-服务类"><a href="#2-2-4-服务类" class="headerlink" title="2.2.4 服务类"></a>2.2.4 服务类</h6><p><strong>快递服务接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递服务接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ExpressService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递已到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">arrive</span><span class="params">(Express express)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>快递服务实现类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递服务实现类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExpressServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">ExpressService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递事件发布者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ExpressEventPublisher expressEventPublisher;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 构造方法</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> expressEventPublisher 快递事件发布者</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ExpressServiceImpl</span><span class="params">(ExpressEventPublisher expressEventPublisher)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.expressEventPublisher = expressEventPublisher;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快递到达</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> express 快递</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">arrive</span><span class="params">(Express express)</span> &#123;</span><br><span class="line">        log.info(<span class="string">&quot;&#123;&#125;的快递已到达蜂站！&quot;</span>, express.getRecipientName());</span><br><span class="line">        expressEventPublisher.notifySubscribersArrive(express);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-测试验证"><a href="#2-3-测试验证" class="headerlink" title="2.3 测试验证"></a>2.3 测试验证</h5><h6 id="2-3-1-测试验证类"><a href="#2-3-1-测试验证类" class="headerlink" title="2.3.1 测试验证类"></a>2.3.1 测试验证类</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 快递事件测试类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExpressEventTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">test</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 快递初始化</span></span><br><span class="line">        <span class="type">Express</span> <span class="variable">express</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Express</span>(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;yiyufxst&quot;</span>, <span class="string">&quot;13245678910&quot;</span>, <span class="string">&quot;xx路&quot;</span>);</span><br><span class="line">        <span class="comment">// 订阅者初始化</span></span><br><span class="line">        <span class="type">ExpressEventSubscriber</span> <span class="variable">appExpressEventListener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AppExpressEventListener</span>();</span><br><span class="line">        <span class="type">ExpressEventSubscriber</span> <span class="variable">smsExpressEventSubscriber</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SmsExpressEventSubscriber</span>();</span><br><span class="line">        <span class="comment">// 发布者初始化</span></span><br><span class="line">        <span class="type">ExpressEventPublisher</span> <span class="variable">expressEventPublisher</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ExpressEventPublisher</span>();</span><br><span class="line">        <span class="comment">// 订阅快递事件</span></span><br><span class="line">        expressEventPublisher.subscribe(appExpressEventListener);</span><br><span class="line">        expressEventPublisher.subscribe(smsExpressEventSubscriber);</span><br><span class="line">        <span class="comment">// 快递服务类初始化</span></span><br><span class="line">        <span class="type">ExpressService</span> <span class="variable">expressService</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ExpressServiceImpl</span>(expressEventPublisher);</span><br><span class="line">        <span class="comment">// 快递到达</span></span><br><span class="line">        expressService.arrive(express);</span><br><span class="line">        <span class="comment">// App取消订阅快递事件</span></span><br><span class="line">        expressEventPublisher.unsubscribe(appExpressEventListener);</span><br><span class="line">        <span class="comment">// 模拟新快递</span></span><br><span class="line">        express.setId(<span class="string">&quot;2&quot;</span>);</span><br><span class="line">        <span class="comment">// 快递到达</span></span><br><span class="line">        expressService.arrive(express);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-3-2-测试结果"><a href="#2-3-2-测试结果" class="headerlink" title="2.3.2 测试结果"></a>2.3.2 测试结果</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">14:50:01.090 [main] INFO  o.d.p.o.s.impl.ExpressServiceImpl - yiyufxst的快递已到达蜂站！</span><br><span class="line">14:50:01.093 [main] INFO  o.d.p.o.s.i.AppExpressEventListener - App 通知：您的包裹1已达到蜂站！</span><br><span class="line">14:50:01.093 [main] INFO  o.d.p.o.s.i.SmsExpressEventSubscriber - 短信通知：您的包裹1已达到蜂站！</span><br><span class="line">14:50:01.093 [main] INFO  o.d.p.o.s.impl.ExpressServiceImpl - yiyufxst的快递已到达蜂站！</span><br><span class="line">14:50:01.093 [main] INFO  o.d.p.o.s.i.SmsExpressEventSubscriber - 短信通知：您的包裹2已达到蜂站！</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、观察者模式结构"><a href="#四、观察者模式结构" class="headerlink" title="四、观察者模式结构"></a>四、观察者模式结构</h3><p><img src="https://img-blog.csdnimg.cn/20210530145134560.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="观察者模式-模式结构图"></p>
+<ol>
+<li><p><strong>发布者</strong>（Publisher）会对其他对象发送值得关注的事件。事件会在发布者自身状态改变或执行特定行为后发生。发布者中包含一个允许新订阅者加入或当前订阅者离开列表的订阅架构。</p>
+<p>当新事件发生时，发送者会便利订阅者列表并调用每个订阅者对象的通知方法。</p>
+</li>
+<li><p><strong>订阅者</strong>（Subscriber）接口声明了通知接口。在绝大多数情况下，该接口仅包含一个更新方法。该方法可以拥有多个参数，以便发布者能在更新时传递时间的详细信息。</p>
+</li>
+<li><p><strong>具体订阅者</strong>（Concrete Subscribers）可以执行一些操作来回应发布者的通知。所有订阅者类实现了同样的接口，因此发布者无需与具体类耦合。</p>
+<p>订阅者通常需要一些上下文信息来正确地处理更新消息。因此发布者会将一些上下文数据作为通知方法的参数进行传递。发布者也可将自身作为参数传递，使订阅者直接获取所需的数据。</p>
+</li>
+<li><p><strong>客户端</strong>（Client）会分别创建发布者和订阅者对象，然后为订阅者注册发布者更新。</p>
+</li>
+</ol>
+<p><strong>设计模式并不难学，其本身就是多年经验提炼出的开发指导思想，关键在于多加练习，带着使用设计模式的思想去优化代码，就能构建出更合理的代码。</strong></p>
+<blockquote>
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/yiyufxst/design-pattern-java">https://github.com/yiyufxst/design-pattern-java</a></p>
+<p>参考资料：<br>小博哥重学设计模式：<a target="_blank" rel="noopener" href="https://github.com/fuzhengwei/itstack-demo-design">https://github.com/fuzhengwei/itstack-demo-design</a><br>深入设计模式：<a target="_blank" rel="noopener" href="https://refactoringguru.cn/design-patterns/catalog">https://refactoringguru.cn/design-patterns/catalog</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/" rel="tag"># 观察者模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/23/2021-05-23%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E5%85%AB%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E5%A4%87%E5%BF%98%E5%BD%95%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E7%BA%BF%E4%B8%8A%E5%88%9A%E5%8F%91%E5%B8%83%E5%B0%B1%E5%87%BA%E9%97%AE%E9%A2%98%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E3%80%8D/" rel="prev" title="初学 Java 设计模式（十八）：实战备忘录模式 「线上刚发布就出问题怎么办？」">
+      <i class="fa fa-chevron-left"></i> 初学 Java 设计模式（十八）：实战备忘录模式 「线上刚发布就出问题怎么办？」
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/05/30/2021-05-30%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E4%BA%8C%E5%8D%81%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E7%8A%B6%E6%80%81%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E4%BA%B2%E8%BA%AB%E5%AE%9E%E8%B7%B5%EF%BC%8C%E7%AE%80%E5%8D%95%E9%AB%98%E6%95%88%E7%9A%84%E6%97%B6%E9%97%B4%E7%AE%A1%E7%90%86%E2%80%94%E2%80%94%E7%95%AA%E8%8C%84%E5%B7%A5%E4%BD%9C%E6%B3%95%E3%80%8D/" rel="next" title="初学 Java 设计模式（二十）：实战状态模式 「亲身实践，简单高效的时间管理——番茄工作法」">
+      初学 Java 设计模式（二十）：实战状态模式 「亲身实践，简单高效的时间管理——番茄工作法」 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">一、观察者模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">1. 解决的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. 定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">3. 应用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">二、观察者模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E4%BC%98%E7%82%B9"><span class="nav-number">2.1.</span> <span class="nav-text">1. 优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BC%BA%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">2. 缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%EF%BC%9A%E6%82%A8%E7%9A%84%E5%BF%AB%E9%80%92%E5%B7%B2%E5%88%B0%E8%BE%BE%E8%9C%82%E7%AB%99%EF%BC%8C%E8%AF%B7%E5%8F%8A%E6%97%B6%E7%AD%BE%E6%94%B6"><span class="nav-number">3.</span> <span class="nav-text">三、观察者模式应用实例：您的快递已到达蜂站，请及时签收</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%9E%E4%BE%8B%E5%9C%BA%E6%99%AF"><span class="nav-number">3.1.</span> <span class="nav-text">1. 实例场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2. 观察者模式实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.1 工程结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2 代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-1-%E5%AE%9E%E4%BD%93%E7%B1%BB"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">2.2.1 实体类</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-2-%E5%8F%91%E5%B8%83%E8%80%85"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">2.2.2 发布者</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-3-%E8%AE%A2%E9%98%85%E8%80%85"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">2.2.3 订阅者</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-4-%E6%9C%8D%E5%8A%A1%E7%B1%BB"><span class="nav-number">3.2.2.4.</span> <span class="nav-text">2.2.4 服务类</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81"><span class="nav-number">3.2.3.</span> <span class="nav-text">2.3 测试验证</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-1-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81%E7%B1%BB"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">2.3.1 测试验证类</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-2-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">2.3.2 测试结果</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">四、观察者模式结构</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">yiyufxst</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">19</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yiyufxst</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
