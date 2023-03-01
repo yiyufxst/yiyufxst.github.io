@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yiyufxst.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、享元模式介绍1. 解决的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初学 Java 设计模式（十二）：实战享元模式 「高校选课系统优化」">
+<meta property="og:url" content="http://yiyufxst.github.io/2021/03/31/2021-03-31%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E9%AB%98%E6%A0%A1%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F%E4%BC%98%E5%8C%96%E3%80%8D/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="一、享元模式介绍1. 解决的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/202103312232353.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2021-03-31T14:27:25.000Z">
+<meta property="article:modified_time" content="2021-03-31T14:27:25.000Z">
+<meta property="article:author" content="yiyufxst">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="享元模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/202103312232353.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="http://yiyufxst.github.io/2021/03/31/2021-03-31%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E9%AB%98%E6%A0%A1%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F%E4%BC%98%E5%8C%96%E3%80%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>初学 Java 设计模式（十二）：实战享元模式 「高校选课系统优化」 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yiyufxst.github.io/2021/03/31/2021-03-31%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%BA%8C%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E9%AB%98%E6%A0%A1%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F%E4%BC%98%E5%8C%96%E3%80%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yiyufxst">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初学 Java 设计模式（十二）：实战享元模式 「高校选课系统优化」
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-31 22:27:25" itemprop="dateCreated datePublished" datetime="2021-03-31T22:27:25+08:00">2021-03-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="一、享元模式介绍"><a href="#一、享元模式介绍" class="headerlink" title="一、享元模式介绍"></a>一、享元模式介绍</h3><h4 id="1-解决的问题"><a href="#1-解决的问题" class="headerlink" title="1. 解决的问题"></a>1. 解决的问题</h4><p>主要解决在有大量对象时，可能造成内存溢出的问题。</p>
+<h4 id="2-定义"><a href="#2-定义" class="headerlink" title="2. 定义"></a>2. 定义</h4><p>享元模式是一种结构型设计模式，它摒弃了在每个对象中保存所有数据的方式，通过共享多个对象所共有的相同状态，能在有限的内存容量中载入更多对象。</p>
+<h4 id="3-应用场景"><a href="#3-应用场景" class="headerlink" title="3. 应用场景"></a>3. 应用场景</h4><ul>
+<li>在程序必须支持大量对象且没有足够的内存容量时使用享元模式。</li>
+</ul>
+<h3 id="二、享元模式优缺点"><a href="#二、享元模式优缺点" class="headerlink" title="二、享元模式优缺点"></a>二、享元模式优缺点</h3><h4 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h4><ul>
+<li>程序中有很多相似对象，那就能节省大量内存。</li>
+</ul>
+<h4 id="2-缺点"><a href="#2-缺点" class="headerlink" title="2. 缺点"></a>2. 缺点</h4><ul>
+<li>可能需要牺牲执行速度来换取内存，因为每次调用向享元方法时都需要重新计算部分情景数据。</li>
+<li>代码会变得更加复杂。如：为什么要拆分一个实体的状态？</li>
+</ul>
+<h3 id="三、享元模式应用实例：高校选课系统优化"><a href="#三、享元模式应用实例：高校选课系统优化" class="headerlink" title="三、享元模式应用实例：高校选课系统优化"></a>三、享元模式应用实例：高校选课系统优化</h3><h4 id="1-实例场景"><a href="#1-实例场景" class="headerlink" title="1. 实例场景"></a>1. 实例场景</h4><p>大家在学校选课时，应该都遇到过高峰期选课系统无法使用，只能眼巴巴地等技术人员修复。</p>
+<p>为什么选课系统说崩就崩呢？有没有一些简单的方法就能对这类场景做优化呢？</p>
+<p>还真有！选课系统主要就是要获取我们的选课信息，在我们填写选课信息后，提交到服务器，由服务起处理选课信息。</p>
+<p>一般来讲，选课系统应该都是为每个学生选择的每个课程创建一个对象，然后提交到服务器。</p>
+<p>这种设计其实在访问量不大的情况下没有什么问题，但高并发情况下，假设每个人的课程信息对象平均大小为 1M ，500 个选课请求仅课程信息对象的内存就达到 500M ，浪费了大量资源，这种大量内存消耗也容易导致 Out Of Memory。</p>
+<p>接下来，就以选课系统作为场景，介绍一下如何用享元模式优化。</p>
+<h4 id="2-享元模式实现"><a href="#2-享元模式实现" class="headerlink" title="2. 享元模式实现"></a>2. 享元模式实现</h4><h5 id="2-1-工程结构"><a href="#2-1-工程结构" class="headerlink" title="2.1 工程结构"></a>2.1 工程结构</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">flyweight-pattern</span><br><span class="line">└─ src</span><br><span class="line">    ├─ main</span><br><span class="line">    │	└─ java</span><br><span class="line">    │    └─ org.design.pattern.flyweight</span><br><span class="line">    │       ├─ model</span><br><span class="line">    │       │    ├─ Course.java</span><br><span class="line">    │       │    └─ Student.java</span><br><span class="line">    │       ├─ factory</span><br><span class="line">    │       │    └─ CourseFactory.java</span><br><span class="line">    │       └─ service</span><br><span class="line">    │            ├─ CourseSelectionService.java</span><br><span class="line">    │            └─ impl</span><br><span class="line">    │                └─ CourseSelectionServiceImpl.java</span><br><span class="line">    └─ test</span><br><span class="line">    	└─ java</span><br><span class="line">            └─ org.design.pattern.flyweight.test</span><br><span class="line">      			└─ CourseSelectionTest.java</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-代码实现"><a href="#2-2-代码实现" class="headerlink" title="2.2 代码实现"></a>2.2 代码实现</h5><h6 id="2-2-1-实体"><a href="#2-2-1-实体" class="headerlink" title="2.2.1 实体"></a>2.2.1 实体</h6><p><strong>课程</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 课程</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Course</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 课程id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 课程名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 学分</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String credit;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>学生</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 学生信息</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 学号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 姓名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-2-工厂"><a href="#2-2-2-工厂" class="headerlink" title="2.2.2 工厂"></a>2.2.2 工厂</h6><p><strong>课程工厂</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 课程工厂</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CourseFactory</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(CourseFactory.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 课程对象池</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, Course&gt; courseMap = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;String, Course&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取课程</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> dataMap 课程数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> Course</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Course <span class="title function_">getCourse</span><span class="params">(Map&lt;String, String&gt; dataMap)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">id</span> <span class="operator">=</span> dataMap.get(<span class="string">&quot;id&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (ObjectUtils.isEmpty(id)) &#123;</span><br><span class="line">            log.warn(<span class="string">&quot;course id is empty&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ObjectUtils.isNotEmpty(courseMap.get(id))) &#123;</span><br><span class="line">            log.info(<span class="string">&quot;get cache course &#123;&#125;&quot;</span>, id);</span><br><span class="line">            <span class="keyword">return</span> courseMap.get(id);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            log.info(<span class="string">&quot;create new course &#123;&#125;&quot;</span>, id);</span><br><span class="line">            <span class="keyword">return</span> createCourse(id, dataMap.get(<span class="string">&quot;name&quot;</span>), dataMap.get(<span class="string">&quot;credit&quot;</span>));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建课程</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> id 课程id</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> name 课程名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> credit 学分</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Course <span class="title function_">createCourse</span><span class="params">(String id, String name, String credit)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (ObjectUtils.isNotEmpty(id) &amp;&amp; ObjectUtils.isNotEmpty(name) &amp;&amp; ObjectUtils.isNotEmpty(credit)) &#123;</span><br><span class="line">            <span class="type">Course</span> <span class="variable">course</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Course</span>(id, name, credit);</span><br><span class="line">            courseMap.put(id, course);</span><br><span class="line">            <span class="keyword">return</span> course;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-3-服务"><a href="#2-2-3-服务" class="headerlink" title="2.2.3 服务"></a>2.2.3 服务</h6><p><strong>选课服务接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 选课服务接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">CourseSelectionService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 选课</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> student 学生</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> courseDataMap 课程数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">selectCourse</span><span class="params">(Student student, Map&lt;String, String&gt; courseDataMap)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>选课服务实现类</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 选课服务实现</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CourseSelectionServiceImpl</span> <span class="keyword">implements</span> <span class="title class_">CourseSelectionService</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(CourseFactory.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 选课</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> student 学生</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> courseDataMap 课程数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">selectCourse</span><span class="params">(Student student, Map&lt;String, String&gt; courseDataMap)</span> &#123;</span><br><span class="line">        <span class="type">Course</span> <span class="variable">course</span> <span class="operator">=</span> CourseFactory.getCourse(courseDataMap);</span><br><span class="line">        <span class="keyword">if</span> (ObjectUtils.isEmpty(course)) &#123;</span><br><span class="line">            log.error(<span class="string">&quot;course is not exist&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        log.info(</span><br><span class="line">                <span class="string">&quot;student &#123;&#125; select &#123;&#125; course, the course credit is &#123;&#125;&quot;</span>,</span><br><span class="line">                student.getName(), student.getName(), course.getCredit()</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-测试验证"><a href="#2-3-测试验证" class="headerlink" title="2.3 测试验证"></a>2.3 测试验证</h5><h6 id="2-3-1-测试验证类"><a href="#2-3-1-测试验证类" class="headerlink" title="2.3.1 测试验证类"></a>2.3.1 测试验证类</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 选课测试类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CourseSelectionTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">CourseSelectionService</span> <span class="variable">courseSelectionService</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CourseSelectionServiceImpl</span>();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testSelectCourse</span><span class="params">()</span> &#123;</span><br><span class="line">        Map&lt;String, String&gt; courseDataMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;String, String&gt;() &#123;</span><br><span class="line">            &#123;</span><br><span class="line">                put(<span class="string">&quot;id&quot;</span>, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">                put(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;高数一&quot;</span>);</span><br><span class="line">                put(<span class="string">&quot;credit&quot;</span>, <span class="string">&quot;5&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">Student</span> <span class="variable">studentA</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Student</span>(<span class="string">&quot;1&quot;</span>, <span class="string">&quot;张三&quot;</span>);</span><br><span class="line">        courseSelectionService.selectCourse(studentA, courseDataMap);</span><br><span class="line">        <span class="type">Student</span> <span class="variable">studentB</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Student</span>(<span class="string">&quot;2&quot;</span>, <span class="string">&quot;李四&quot;</span>);</span><br><span class="line">        courseSelectionService.selectCourse(studentB, courseDataMap);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-3-2-测试结果"><a href="#2-3-2-测试结果" class="headerlink" title="2.3.2 测试结果"></a>2.3.2 测试结果</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">17:22:37.377 [main] INFO  o.d.p.f.factory.CourseFactory - create new course 1</span><br><span class="line">17:22:37.380 [main] INFO  o.d.p.f.factory.CourseFactory - student 张三 select 张三 course, the course credit is 5</span><br><span class="line">17:22:37.380 [main] INFO  o.d.p.f.factory.CourseFactory - get cache course 1</span><br><span class="line">17:22:37.380 [main] INFO  o.d.p.f.factory.CourseFactory - student 李四 select 李四 course, the course credit is 5</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="四、享元模式结构"><a href="#四、享元模式结构" class="headerlink" title="四、享元模式结构"></a>四、享元模式结构</h3><p><img src="https://img-blog.csdnimg.cn/202103312232353.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="享元模式-模式结构图"></p>
+<p>享元模式只是一种优化。在应用该模式之前，要确定程序中存在大量类似对象同时占用内存相关的内存消耗问题，并且确保该问题无法使用其他更好的方式来解决。</p>
+<ol>
+<li><p><strong>享元</strong>（Flyweight）类包含原始对象中部分能在多个对象中共享的状态。</p>
+<p>同一享元对象可在许多不同情景中使用。享元中存储的状态被称为 “内在状态” 。传递给享元方法的状态被称为 “外在状态” 。</p>
+</li>
+<li><p><strong>情景</strong> （Context）类包含原始对象中各不相同的外在状态。</p>
+<p>情景与享元对象组合在一起就能表示原始对象的全部状态。</p>
+</li>
+<li><p>通常情况下，原始对象的行为会保留在享元类中。因此享元方法必须提供部分外在状态作为参数。但也可以将行为移动到情景类中，然后将连入的享元作为单纯的数据对象。</p>
+</li>
+<li><p><strong>客户端</strong>（Client）负责计算或者存储享元的外在状态。在客户端看来，享元是一种可在运行时进行配置的模板对象，具体的配置方式为向其方法中传入一些情景数据参数。</p>
+</li>
+<li><p><strong>享元工厂</strong>（Flyweight Factory）会对已有享元的缓存池进行管理。</p>
+<p>有了工厂后，客户端就无需直接创建享元，只需调用工厂并向其传递目标享元的一些内在状态即可。工厂会根据参数在之前已创建的享元中进行查找，找到满足条件的享元将其返回，否则根据参数新建享元。</p>
+</li>
+</ol>
+<p><strong>设计模式并不难学，其本身就是多年经验提炼出的开发指导思想，关键在于多加练习，带着使用设计模式的思想去优化代码，就能构建出更合理的代码。</strong></p>
+<blockquote>
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/yiyufxst/design-pattern-java">https://github.com/yiyufxst/design-pattern-java</a></p>
+<p>参考资料：<br>小博哥重学设计模式：<a target="_blank" rel="noopener" href="https://github.com/fuzhengwei/itstack-demo-design">https://github.com/fuzhengwei/itstack-demo-design</a><br>深入设计模式：<a target="_blank" rel="noopener" href="https://refactoringguru.cn/design-patterns/catalog">https://refactoringguru.cn/design-patterns/catalog</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F/" rel="tag"># 享元模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/28/2021-03-28%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%B8%80%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E5%99%A8%E3%80%8D/" rel="prev" title="初学 Java 设计模式（十一）：实战外观模式 「类型转换器」">
+      <i class="fa fa-chevron-left"></i> 初学 Java 设计模式（十一）：实战外观模式 「类型转换器」
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/10/2021-04-10%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%E4%B8%89%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E8%A7%86%E9%A2%91%20App%20%E4%BB%A3%E7%90%86%E7%BC%93%E5%AD%98%E3%80%8D/" rel="next" title="初学 Java 设计模式（十三）：实战代理模式 「视频 App 代理缓存」">
+      初学 Java 设计模式（十三）：实战代理模式 「视频 App 代理缓存」 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">一、享元模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">1. 解决的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. 定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">3. 应用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">二、享元模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E4%BC%98%E7%82%B9"><span class="nav-number">2.1.</span> <span class="nav-text">1. 优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BC%BA%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">2. 缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%EF%BC%9A%E9%AB%98%E6%A0%A1%E9%80%89%E8%AF%BE%E7%B3%BB%E7%BB%9F%E4%BC%98%E5%8C%96"><span class="nav-number">3.</span> <span class="nav-text">三、享元模式应用实例：高校选课系统优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%9E%E4%BE%8B%E5%9C%BA%E6%99%AF"><span class="nav-number">3.1.</span> <span class="nav-text">1. 实例场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2. 享元模式实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.1 工程结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2 代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-1-%E5%AE%9E%E4%BD%93"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">2.2.1 实体</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-2-%E5%B7%A5%E5%8E%82"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">2.2.2 工厂</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-3-%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">2.2.3 服务</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81"><span class="nav-number">3.2.3.</span> <span class="nav-text">2.3 测试验证</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-1-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81%E7%B1%BB"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">2.3.1 测试验证类</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-2-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">2.3.2 测试结果</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">四、享元模式结构</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">yiyufxst</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yiyufxst</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

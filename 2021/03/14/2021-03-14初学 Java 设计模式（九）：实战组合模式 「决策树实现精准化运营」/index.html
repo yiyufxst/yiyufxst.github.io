@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yiyufxst.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一、组合模式介绍1. 解决的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初学 Java 设计模式（九）：实战组合模式 「决策树实现精准化运营」">
+<meta property="og:url" content="http://yiyufxst.github.io/2021/03/14/2021-03-14%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E5%86%B3%E7%AD%96%E6%A0%91%E5%AE%9E%E7%8E%B0%E7%B2%BE%E5%87%86%E5%8C%96%E8%BF%90%E8%90%A5%E3%80%8D/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="一、组合模式介绍1. 解决的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210314185303278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20210314185326219.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2021-03-14T10:54:02.000Z">
+<meta property="article:modified_time" content="2021-03-14T10:54:02.000Z">
+<meta property="article:author" content="yiyufxst">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="组合模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20210314185303278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center">
+
+<link rel="canonical" href="http://yiyufxst.github.io/2021/03/14/2021-03-14%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E5%86%B3%E7%AD%96%E6%A0%91%E5%AE%9E%E7%8E%B0%E7%B2%BE%E5%87%86%E5%8C%96%E8%BF%90%E8%90%A5%E3%80%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>初学 Java 设计模式（九）：实战组合模式 「决策树实现精准化运营」 | Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yiyufxst.github.io/2021/03/14/2021-03-14%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E4%B9%9D%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E5%86%B3%E7%AD%96%E6%A0%91%E5%AE%9E%E7%8E%B0%E7%B2%BE%E5%87%86%E5%8C%96%E8%BF%90%E8%90%A5%E3%80%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="yiyufxst">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          初学 Java 设计模式（九）：实战组合模式 「决策树实现精准化运营」
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-14 18:54:02" itemprop="dateCreated datePublished" datetime="2021-03-14T18:54:02+08:00">2021-03-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="一、组合模式介绍"><a href="#一、组合模式介绍" class="headerlink" title="一、组合模式介绍"></a>一、组合模式介绍</h3><h4 id="1-解决的问题"><a href="#1-解决的问题" class="headerlink" title="1. 解决的问题"></a>1. 解决的问题</h4><p>在树形结构的问题中，模糊了简单元素和复杂元素的概念，客户端可以像处理简单元素一样来处理复杂元素，从而使客户端和复杂元素的内部元素解耦。</p>
+<h4 id="2-定义"><a href="#2-定义" class="headerlink" title="2. 定义"></a>2. 定义</h4><p>组合模式是一种结构型设计模式，可以使用它将对象组合成树状结构，并能像使用独立对象一样使用它们。</p>
+<h4 id="3-应用场景"><a href="#3-应用场景" class="headerlink" title="3. 应用场景"></a>3. 应用场景</h4><ul>
+<li>需要实现树状对象结构，可以使用组合模式。</li>
+<li>希望客户端代码以相同方式处理简单和复杂元素，可以使用组合模式。</li>
+</ul>
+<h3 id="二、组合模式优缺点"><a href="#二、组合模式优缺点" class="headerlink" title="二、组合模式优缺点"></a>二、组合模式优缺点</h3><h4 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h4><ul>
+<li>可以利用多态和递归机制更方便地使用复杂树结构。</li>
+<li>开闭原则：无需更改现有代码，就可以在应用中添加新元素，使其成为对象树的一部分。</li>
+</ul>
+<h4 id="2-缺点"><a href="#2-缺点" class="headerlink" title="2. 缺点"></a>2. 缺点</h4><ul>
+<li>对于功能差异较大的类，提供公共接口会有困难。在特定情况下，需要过渡一般化组件接口，使其变得令人难以理解。</li>
+</ul>
+<h3 id="三、组合模式应用实例：决策树实现精准化运营"><a href="#三、组合模式应用实例：决策树实现精准化运营" class="headerlink" title="三、组合模式应用实例：决策树实现精准化运营"></a>三、组合模式应用实例：决策树实现精准化运营</h3><h4 id="1-实例场景"><a href="#1-实例场景" class="headerlink" title="1. 实例场景"></a>1. 实例场景</h4><p>精准化运营在我们的业务开发中越来越重要，产品往往会根据性别、年龄、查看偏好等条件来决定给不同范围的用户推送不同的消息，目前就以该场景来实现组合场景。</p>
+<p><img src="https://img-blog.csdnimg.cn/20210314185303278.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h4 id="2-组合模式实现"><a href="#2-组合模式实现" class="headerlink" title="2. 组合模式实现"></a>2. 组合模式实现</h4><p>本次组合模式的实现思想是依托决策树的形式。</p>
+<p><strong>基础概念</strong></p>
+<p><strong>决策树</strong>记录了当前根节点和全部节点列表。</p>
+<p><strong>非叶子节点</strong>包含策略名、节点策略列表。</p>
+<p><strong>节点策略</strong>包含下一个字节点、当前决策类型（大于、等于等条件）、当前决策类型。</p>
+<p><strong>叶子节点</strong>定义了最终的策略，如推送二次元文章、推送财经类文章等。</p>
+<p><strong>决策树遍历步骤</strong>：</p>
+<ol>
+<li>当发现节点为非叶子节点时，根据策略名获取当前策略。</li>
+<li>根据策略数据遍历节点策略列表，判断满足哪种节点策略。</li>
+<li>根据满足的节点策略获取下一个节点。</li>
+<li>当发现节点为叶子节点，返回节点数据，遍历结束。</li>
+</ol>
+<h5 id="2-1-工程结构"><a href="#2-1-工程结构" class="headerlink" title="2.1 工程结构"></a>2.1 工程结构</h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">composite-pattern</span><br><span class="line">└─ src</span><br><span class="line">    ├─ main</span><br><span class="line">    │	└─ java</span><br><span class="line">    │    └─ org.design.pattern.composite</span><br><span class="line">    │       ├─ model</span><br><span class="line">    │       │  ├─ tree</span><br><span class="line">    │       │  │  ├─ Tree.java</span><br><span class="line">    │       │  │  ├─ TreeNode.java</span><br><span class="line">    │       │  │  └─ TreeNodeDecision.java</span><br><span class="line">    │       │  └─ decision</span><br><span class="line">    │       │     ├─ DecisionResult.java</span><br><span class="line">    │       │     ├─ LogicDecision.java</span><br><span class="line">    │       │     ├─ LogicBaseDecision.java</span><br><span class="line">    │       │     └─ impl</span><br><span class="line">    │       │        ├─ UserGenderDecision.java</span><br><span class="line">    │       │        └─ UserAgeDecision.java</span><br><span class="line">    │       └─ service</span><br><span class="line">    │          ├─ DecisionTreeService.java</span><br><span class="line">    │          ├─ DecisionTreeBaseService.java</span><br><span class="line">    │          └─ impl</span><br><span class="line">    │              └─ UserPushDecisionTreeService.java</span><br><span class="line">    └─ test</span><br><span class="line">    	└─ java</span><br><span class="line">            └─ org.design.pattern.composite.test</span><br><span class="line">      			└─ TreeTest.java</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-代码实现"><a href="#2-2-代码实现" class="headerlink" title="2.2 代码实现"></a>2.2 代码实现</h5><h6 id="2-2-1-树相关模型"><a href="#2-2-1-树相关模型" class="headerlink" title="2.2.1 树相关模型"></a>2.2.1 树相关模型</h6><p><strong>决策树</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Tree</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> TreeNode treeRootNode;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点列表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Map&lt;Long, TreeNode&gt; treeNodeMap;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>决策树节点</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树节点</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TreeNode</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long nodeId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点类型</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String NodeType;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Object NodeValue;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 来源节点id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long fromNodeId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 去向节点id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long toNodeId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String decisionName;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策规则列表</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;TreeNodeDecision&gt; treeNodeDecisionList;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>决策树节点决策</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树节点决策</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TreeNodeDecision</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策名称</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 来源节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long fromNode;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 去向节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long toNode;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策类型</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String decisionType;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String decisionValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-2-决策相关模型"><a href="#2-2-2-决策相关模型" class="headerlink" title="2.2.2 决策相关模型"></a>2.2.2 决策相关模型</h6><p><strong>逻辑决策器接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 逻辑决策器接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">LogicDecision</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取决策值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> treeId 决策树id</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userId 用户id</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userData 用户数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> String</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    String <span class="title function_">getDecisionValue</span><span class="params">(Long treeId, String userId, Map&lt;String, String&gt; userData)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 过滤出节点决策</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> decisionValue 决策值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> treeNodeDecisionList 节点决策列表</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    Long <span class="title function_">filterDecisionNode</span><span class="params">(String decisionValue, List&lt;TreeNodeDecision&gt; treeNodeDecisionList)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>逻辑基础决策器</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 逻辑基础决策器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">LogicBaseDecision</span> <span class="keyword">implements</span> <span class="title class_">LogicDecision</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> String <span class="title function_">getDecisionValue</span><span class="params">(Long treeId, String userId, Map&lt;String, String&gt; userData)</span>;;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Long <span class="title function_">filterDecisionNode</span><span class="params">(String decisionValue, List&lt;TreeNodeDecision&gt; treeNodeDecisionList)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (TreeNodeDecision treeNodeDecision : treeNodeDecisionList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (filterDecisionByType(decisionValue, treeNodeDecision)) &#123;</span><br><span class="line">                <span class="keyword">return</span> treeNodeDecision.getToNode();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0L</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 根据类型过滤决策</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> decisionValue 决策值</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> treeNodeDecision 节点决策</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> boolean</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">filterDecisionByType</span><span class="params">(String decisionValue, TreeNodeDecision treeNodeDecision)</span> &#123;</span><br><span class="line">        <span class="keyword">switch</span> (treeNodeDecision.getDecisionType()) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;eq&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> decisionValue.equals(treeNodeDecision.getDecisionValue());</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;gt&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> Double.parseDouble(decisionValue) &gt; Double.parseDouble(treeNodeDecision.getDecisionValue());</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;gte&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> Double.parseDouble(decisionValue) &gt;= Double.parseDouble(treeNodeDecision.getDecisionValue());</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;lt&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> Double.parseDouble(decisionValue) &lt; Double.parseDouble(treeNodeDecision.getDecisionValue());</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&quot;lte&quot;</span>:</span><br><span class="line">                <span class="keyword">return</span> Double.parseDouble(decisionValue) &lt;= Double.parseDouble(treeNodeDecision.getDecisionValue());</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>用户性别决策器</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 用户性别决策器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserGenderDecision</span> <span class="keyword">extends</span> <span class="title class_">LogicBaseDecision</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getDecisionValue</span><span class="params">(Long treeId, String userId, Map&lt;String, String&gt; userData)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> userData.get(<span class="string">&quot;gender&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>用户年龄决策器</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 用户年龄决策器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserAgeDecision</span> <span class="keyword">extends</span> <span class="title class_">LogicBaseDecision</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getDecisionValue</span><span class="params">(Long treeId, String userId, Map&lt;String, String&gt; userData)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> userData.get(<span class="string">&quot;age&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>决策结果</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策结果</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Getter</span></span><br><span class="line"><span class="meta">@Setter</span></span><br><span class="line"><span class="meta">@AllArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DecisionResult</span> &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用户id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> String userId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策树id</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Long treeId;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 结果节点值</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Object resultNodeValue;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-2-3-决策树服务"><a href="#2-2-3-决策树服务" class="headerlink" title="2.2.3 决策树服务"></a>2.2.3 决策树服务</h6><p><strong>决策树服务接口</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树服务接口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">DecisionTreeService</span> &#123;</span><br><span class="line">    DecisionResult <span class="title function_">process</span><span class="params">(<span class="keyword">final</span> Tree treeId, <span class="keyword">final</span> String userId, <span class="keyword">final</span> Map&lt;String, String&gt; userData)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>决策树基础服务</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树基础服务</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">DecisionTreeBaseService</span> <span class="keyword">implements</span> <span class="title class_">DecisionTreeService</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(DecisionTreeBaseService.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 决策map</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> Map&lt;String, LogicDecision&gt; logicDecisionMap = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> DecisionResult <span class="title function_">process</span><span class="params">(Tree tree, String userId, Map&lt;String, String&gt; userData)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 寻找叶子节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> tree 决策树</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userId 用户id</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> userData 用户数据</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> TreeNode <span class="title function_">findLeafNode</span><span class="params">(Tree tree, String userId, Map&lt;String, String&gt; userData)</span> &#123;</span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">treeNode</span> <span class="operator">=</span> tree.getTreeRootNode();</span><br><span class="line">        <span class="keyword">while</span> (treeNode.getNodeType().equals(<span class="string">&quot;branch&quot;</span>)) &#123;</span><br><span class="line">            <span class="comment">//获取节点决策</span></span><br><span class="line">            <span class="type">LogicDecision</span> <span class="variable">logicDecision</span> <span class="operator">=</span> logicDecisionMap.get(treeNode.getDecisionName());</span><br><span class="line">            <span class="comment">//获取需要决策的值</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">decisionValue</span> <span class="operator">=</span> logicDecision.getDecisionValue(tree.getId(), userId, userData);</span><br><span class="line">            <span class="comment">//根据节点决策列表，获取下一节点id</span></span><br><span class="line">            <span class="type">Long</span> <span class="variable">nextNodeId</span> <span class="operator">=</span> logicDecision.filterDecisionNode(decisionValue, treeNode.getTreeNodeDecisionList());</span><br><span class="line">            log.info(</span><br><span class="line">                    <span class="string">&quot;决策树：&#123;&#125;，用户id：&#123;&#125;，当前节点id：&#123;&#125;，下一节点id：&#123;&#125;，决策名：&#123;&#125;，决策值：&#123;&#125;&quot;</span>,</span><br><span class="line">                    tree.getId(),</span><br><span class="line">                    userId,</span><br><span class="line">                    treeNode.getNodeId(),</span><br><span class="line">                    nextNodeId,</span><br><span class="line">                    treeNode.getDecisionName(),</span><br><span class="line">                    decisionValue</span><br><span class="line">            );</span><br><span class="line">            treeNode = tree.getTreeNodeMap().get(nextNodeId);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> treeNode;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>用户推送决策树服务</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 用户推送决策树服务</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserPushDecisionTreeService</span> <span class="keyword">extends</span> <span class="title class_">DecisionTreeBaseService</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">UserPushDecisionTreeService</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.logicDecisionMap.put(<span class="string">&quot;gender&quot;</span>, <span class="keyword">new</span> <span class="title class_">UserGenderDecision</span>());</span><br><span class="line">        <span class="built_in">this</span>.logicDecisionMap.put(<span class="string">&quot;age&quot;</span>, <span class="keyword">new</span> <span class="title class_">UserAgeDecision</span>());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> DecisionResult <span class="title function_">process</span><span class="params">(Tree tree, String userId, Map&lt;String, String&gt; userData)</span> &#123;</span><br><span class="line">        <span class="comment">//寻找最终决策节点</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">resultNode</span> <span class="operator">=</span> findLeafNode(tree, userId, userData);</span><br><span class="line">        <span class="comment">//决策结果</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DecisionResult</span>(userId, tree.getId(), resultNode.getNodeValue());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-3-测试验证"><a href="#2-3-测试验证" class="headerlink" title="2.3 测试验证"></a>2.3 测试验证</h5><h6 id="2-3-1-测试验证类"><a href="#2-3-1-测试验证类" class="headerlink" title="2.3.1 测试验证类"></a>2.3.1 测试验证类</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 决策树测试类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TreeTest</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">log</span> <span class="operator">=</span> LoggerFactory.getLogger(TreeTest.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> Tree tree;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Before</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">initTree</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">//根节点（用户性别）</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">rootNode</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        rootNode.setNodeId(<span class="number">1L</span>);</span><br><span class="line">        rootNode.setNodeType(<span class="string">&quot;branch&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//根节点的子节点</span></span><br><span class="line">        <span class="comment">//子节点1</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">rootChildOne</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        rootChildOne.setNodeId(<span class="number">11L</span>);</span><br><span class="line">        rootChildOne.setNodeType(<span class="string">&quot;branch&quot;</span>);</span><br><span class="line">        rootChildOne.setFromNodeId(rootNode.getNodeId());</span><br><span class="line">        <span class="comment">//子节点2</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">rootChildTwo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        rootChildTwo.setNodeId(<span class="number">12L</span>);</span><br><span class="line">        rootChildTwo.setNodeType(<span class="string">&quot;branch&quot;</span>);</span><br><span class="line">        rootChildTwo.setFromNodeId(rootNode.getNodeId());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//孙节点</span></span><br><span class="line">        <span class="comment">//孙节点1</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">grandChildrenOne</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        grandChildrenOne.setNodeId(<span class="number">111L</span>);</span><br><span class="line">        grandChildrenOne.setNodeType(<span class="string">&quot;leaf&quot;</span>);</span><br><span class="line">        grandChildrenOne.setNodeValue(<span class="string">&quot;推送二次元类文章&quot;</span>);</span><br><span class="line">        grandChildrenOne.setFromNodeId(rootChildOne.getFromNodeId());</span><br><span class="line">        <span class="comment">//孙节点2</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">grandChildrenTwo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        grandChildrenTwo.setNodeId(<span class="number">112L</span>);</span><br><span class="line">        grandChildrenTwo.setNodeType(<span class="string">&quot;leaf&quot;</span>);</span><br><span class="line">        grandChildrenTwo.setNodeValue(<span class="string">&quot;推送财经类文章&quot;</span>);</span><br><span class="line">        grandChildrenTwo.setFromNodeId(rootChildOne.getFromNodeId());</span><br><span class="line">        <span class="comment">//孙节点3</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">grandChildrenThree</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        grandChildrenThree.setNodeId(<span class="number">121L</span>);</span><br><span class="line">        grandChildrenThree.setNodeType(<span class="string">&quot;leaf&quot;</span>);</span><br><span class="line">        grandChildrenThree.setNodeValue(<span class="string">&quot;推送A类文章&quot;</span>);</span><br><span class="line">        grandChildrenThree.setFromNodeId(rootChildTwo.getFromNodeId());</span><br><span class="line">        <span class="comment">//孙节点4</span></span><br><span class="line">        <span class="type">TreeNode</span> <span class="variable">grandChildrenFour</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNode</span>();</span><br><span class="line">        grandChildrenFour.setNodeId(<span class="number">122L</span>);</span><br><span class="line">        grandChildrenFour.setNodeType(<span class="string">&quot;leaf&quot;</span>);</span><br><span class="line">        grandChildrenFour.setNodeValue(<span class="string">&quot;推送B类文章&quot;</span>);</span><br><span class="line">        grandChildrenFour.setFromNodeId(rootChildOne.getFromNodeId());</span><br><span class="line"></span><br><span class="line">        <span class="comment">//根节点决策</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">rootDecisionName</span> <span class="operator">=</span> <span class="string">&quot;gender&quot;</span>;</span><br><span class="line">        rootNode.setDecisionName(rootDecisionName);</span><br><span class="line">        <span class="comment">//性别男</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">manDecision</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        manDecision.setDecisionType(<span class="string">&quot;eq&quot;</span>);</span><br><span class="line">        manDecision.setDecisionValue(<span class="string">&quot;man&quot;</span>);</span><br><span class="line">        manDecision.setFromNode(rootNode.getNodeId());</span><br><span class="line">        manDecision.setToNode(rootChildOne.getNodeId());</span><br><span class="line">        <span class="comment">//性别女</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">womanDecision</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        womanDecision.setDecisionType(<span class="string">&quot;eq&quot;</span>);</span><br><span class="line">        womanDecision.setDecisionValue(<span class="string">&quot;woman&quot;</span>);</span><br><span class="line">        womanDecision.setFromNode(rootNode.getNodeId());</span><br><span class="line">        womanDecision.setToNode(rootChildTwo.getNodeId());</span><br><span class="line">        <span class="comment">//设置根节点决策</span></span><br><span class="line">        List&lt;TreeNodeDecision&gt; rootNodeDecisionList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">2</span>);</span><br><span class="line">        rootNodeDecisionList.add(manDecision);</span><br><span class="line">        rootNodeDecisionList.add(womanDecision);</span><br><span class="line">        rootNode.setTreeNodeDecisionList(rootNodeDecisionList);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//子节点决策</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">childDecisionName</span> <span class="operator">=</span> <span class="string">&quot;age&quot;</span>;</span><br><span class="line">        rootChildOne.setDecisionName(childDecisionName);</span><br><span class="line">        rootChildTwo.setDecisionName(childDecisionName);</span><br><span class="line">        <span class="comment">//子节点1决策</span></span><br><span class="line">        <span class="comment">//男，年龄≤24</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">ageDecisionOne</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        ageDecisionOne.setDecisionType(<span class="string">&quot;lte&quot;</span>);</span><br><span class="line">        ageDecisionOne.setDecisionValue(<span class="string">&quot;24&quot;</span>);</span><br><span class="line">        ageDecisionOne.setFromNode(rootChildOne.getNodeId());</span><br><span class="line">        ageDecisionOne.setToNode(grandChildrenOne.getNodeId());</span><br><span class="line">        <span class="comment">//男，年龄＞24</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">ageDecisionTwo</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        ageDecisionTwo.setDecisionType(<span class="string">&quot;gt&quot;</span>);</span><br><span class="line">        ageDecisionTwo.setDecisionValue(<span class="string">&quot;24&quot;</span>);</span><br><span class="line">        ageDecisionTwo.setFromNode(rootChildOne.getNodeId());</span><br><span class="line">        ageDecisionTwo.setToNode(grandChildrenTwo.getNodeId());</span><br><span class="line">        <span class="comment">//设置子节点1决策</span></span><br><span class="line">        List&lt;TreeNodeDecision&gt; rootChildOneDecisionList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">2</span>);</span><br><span class="line">        rootChildOneDecisionList.add(ageDecisionOne);</span><br><span class="line">        rootChildOneDecisionList.add(ageDecisionTwo);</span><br><span class="line">        rootChildOne.setTreeNodeDecisionList(rootChildOneDecisionList);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//子节点2决策</span></span><br><span class="line">        <span class="comment">//女，年龄≤35</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">ageDecisionThree</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        ageDecisionThree.setDecisionType(<span class="string">&quot;lte&quot;</span>);</span><br><span class="line">        ageDecisionThree.setDecisionValue(<span class="string">&quot;35&quot;</span>);</span><br><span class="line">        ageDecisionThree.setFromNode(rootChildTwo.getNodeId());</span><br><span class="line">        ageDecisionThree.setToNode(grandChildrenThree.getNodeId());</span><br><span class="line">        <span class="comment">//女，年龄＞35</span></span><br><span class="line">        <span class="type">TreeNodeDecision</span> <span class="variable">ageDecisionFour</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TreeNodeDecision</span>();</span><br><span class="line">        ageDecisionFour.setDecisionType(<span class="string">&quot;gt&quot;</span>);</span><br><span class="line">        ageDecisionFour.setDecisionValue(<span class="string">&quot;35&quot;</span>);</span><br><span class="line">        ageDecisionFour.setFromNode(rootChildTwo.getNodeId());</span><br><span class="line">        ageDecisionFour.setToNode(grandChildrenFour.getNodeId());</span><br><span class="line">        <span class="comment">//设置子节点2决策</span></span><br><span class="line">        List&lt;TreeNodeDecision&gt; rootChildTwoDecisionList = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(<span class="number">2</span>);</span><br><span class="line">        rootChildTwoDecisionList.add(ageDecisionThree);</span><br><span class="line">        rootChildTwoDecisionList.add(ageDecisionFour);</span><br><span class="line">        rootChildTwo.setTreeNodeDecisionList(rootChildTwoDecisionList);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//设置决策树</span></span><br><span class="line">        tree = <span class="keyword">new</span> <span class="title class_">Tree</span>();</span><br><span class="line">        tree.setId(<span class="number">1L</span>);</span><br><span class="line">        tree.setName(<span class="string">&quot;精准化运营消息推送决策树&quot;</span>);</span><br><span class="line">        <span class="comment">//决策树根节点</span></span><br><span class="line">        tree.setTreeRootNode(rootNode);</span><br><span class="line">        <span class="comment">//决策树节点</span></span><br><span class="line">        Map&lt;Long, TreeNode&gt; treeNodeMap = <span class="keyword">new</span> <span class="title class_">TreeMap</span>&lt;&gt;();</span><br><span class="line">        treeNodeMap.put(rootNode.getNodeId(), rootNode);</span><br><span class="line">        treeNodeMap.put(rootChildOne.getNodeId(), rootChildOne);</span><br><span class="line">        treeNodeMap.put(rootChildTwo.getNodeId(), rootChildTwo);</span><br><span class="line">        treeNodeMap.put(grandChildrenOne.getNodeId(), grandChildrenOne);</span><br><span class="line">        treeNodeMap.put(grandChildrenTwo.getNodeId(), grandChildrenTwo);</span><br><span class="line">        treeNodeMap.put(grandChildrenThree.getNodeId(), grandChildrenThree);</span><br><span class="line">        treeNodeMap.put(grandChildrenFour.getNodeId(), grandChildrenFour);</span><br><span class="line">        tree.setTreeNodeMap(treeNodeMap);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testUserPushDecisionTree</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">UserPushDecisionTreeService</span> <span class="variable">userPushDecisionTreeService</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">UserPushDecisionTreeService</span>();</span><br><span class="line">        <span class="comment">//用户数据</span></span><br><span class="line">        Map&lt;String, String&gt; userData = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        userData.put(<span class="string">&quot;gender&quot;</span>, <span class="string">&quot;man&quot;</span>);</span><br><span class="line">        userData.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;29&quot;</span>);</span><br><span class="line">        <span class="type">DecisionResult</span> <span class="variable">result</span> <span class="operator">=</span> userPushDecisionTreeService.process(tree, <span class="string">&quot;yiyufxst&quot;</span>, userData);</span><br><span class="line">        log.info(<span class="string">&quot;性别:&#123;&#125;，年龄：&#123;&#125;的用户推送&#123;&#125;&quot;</span>, userData.get(<span class="string">&quot;gender&quot;</span>), userData.get(<span class="string">&quot;age&quot;</span>), result.getResultNodeValue());</span><br><span class="line">        userData.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;24&quot;</span>);</span><br><span class="line">        result = userPushDecisionTreeService.process(tree, <span class="string">&quot;yiyufxst&quot;</span>, userData);</span><br><span class="line">        log.info(<span class="string">&quot;性别:&#123;&#125;，年龄：&#123;&#125;的用户推送&#123;&#125;&quot;</span>, userData.get(<span class="string">&quot;gender&quot;</span>), userData.get(<span class="string">&quot;age&quot;</span>), result.getResultNodeValue());</span><br><span class="line">        userData.put(<span class="string">&quot;gender&quot;</span>, <span class="string">&quot;woman&quot;</span>);</span><br><span class="line">        userData.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;35&quot;</span>);</span><br><span class="line">        result = userPushDecisionTreeService.process(tree, <span class="string">&quot;马冬梅&quot;</span>, userData);</span><br><span class="line">        log.info(<span class="string">&quot;性别:&#123;&#125;，年龄：&#123;&#125;的用户推送&#123;&#125;&quot;</span>, userData.get(<span class="string">&quot;gender&quot;</span>), userData.get(<span class="string">&quot;age&quot;</span>), result.getResultNodeValue());</span><br><span class="line">        userData.put(<span class="string">&quot;age&quot;</span>, <span class="string">&quot;40&quot;</span>);</span><br><span class="line">        result = userPushDecisionTreeService.process(tree, <span class="string">&quot;马冬梅&quot;</span>, userData);</span><br><span class="line">        log.info(<span class="string">&quot;性别:&#123;&#125;，年龄：&#123;&#125;的用户推送&#123;&#125;&quot;</span>, userData.get(<span class="string">&quot;gender&quot;</span>), userData.get(<span class="string">&quot;age&quot;</span>), result.getResultNodeValue());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="2-3-2-测试结果"><a href="#2-3-2-测试结果" class="headerlink" title="2.3.2 测试结果"></a>2.3.2 测试结果</h6><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">18:19:50.198 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：yiyufxst，当前节点id：1，下一节点id：11，决策名：gender，决策值：man</span><br><span class="line">18:19:50.201 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：yiyufxst，当前节点id：11，下一节点id：112，决策名：age，决策值：29</span><br><span class="line">18:19:50.201 [main] INFO  o.d.pattern.composite.test.TreeTest - 性别:man，年龄：29的用户推送推送财经类文章</span><br><span class="line">18:19:50.201 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：yiyufxst，当前节点id：1，下一节点id：11，决策名：gender，决策值：man</span><br><span class="line">18:19:50.201 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：yiyufxst，当前节点id：11，下一节点id：111，决策名：age，决策值：24</span><br><span class="line">18:19:50.201 [main] INFO  o.d.pattern.composite.test.TreeTest - 性别:man，年龄：24的用户推送推送二次元类文章</span><br><span class="line">18:19:50.202 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：马冬梅，当前节点id：1，下一节点id：12，决策名：gender，决策值：woman</span><br><span class="line">18:19:50.202 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：马冬梅，当前节点id：12，下一节点id：121，决策名：age，决策值：35</span><br><span class="line">18:19:50.202 [main] INFO  o.d.pattern.composite.test.TreeTest - 性别:woman，年龄：35的用户推送推送A类文章</span><br><span class="line">18:19:50.202 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：马冬梅，当前节点id：1，下一节点id：12，决策名：gender，决策值：woman</span><br><span class="line">18:19:50.202 [main] INFO  o.d.p.c.s.DecisionTreeBaseService - 决策树：1，用户id：马冬梅，当前节点id：12，下一节点id：122，决策名：age，决策值：40</span><br><span class="line">18:19:50.202 [main] INFO  o.d.pattern.composite.test.TreeTest - 性别:woman，年龄：40的用户推送推送B类文章</span><br><span class="line"></span><br><span class="line">Process finished with exit code 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="四、组合模式结构"><a href="#四、组合模式结构" class="headerlink" title="四、组合模式结构"></a>四、组合模式结构</h3><p><img src="https://img-blog.csdnimg.cn/20210314185326219.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3BvcDE1ODYwODIyMTM=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<ol>
+<li><p><strong>组件</strong>（Component）接口描述了树中简单项目和复杂项目所共有的操作。</p>
+</li>
+<li><p><strong>叶节点</strong>（Leaf）是树的基础结构，它不包含子项目。</p>
+<p>一般情况下，叶节点最终会完成大部分的实际工作，因为它们无法把工作委派给其他部分。</p>
+</li>
+<li><p><strong>容器</strong>（Container）——又名“组合（Composite）”——是包含叶节点或其他容器等子项目的单位。容器不知道其子项目所属的具体类，它只通过通用的组件接口与其子项目交互。</p>
+<p>容器接收到请求会将工作分配给自己的子项目，处理中间结果，然后将最终结果返回给客户端。</p>
+</li>
+<li><p><strong>客户端</strong>（Client）通过组件接口与所有项目交互。因此，客户端能以相同方式与树状结构中的简单或复杂项目交互。</p>
+</li>
+</ol>
+<p><strong>设计模式并不难学，其本身就是多年经验提炼出的开发指导思想，关键在于多加练习，带着使用设计模式的思想去优化代码，就能构建出更合理的代码。</strong></p>
+<blockquote>
+<p>源码地址：<a target="_blank" rel="noopener" href="https://github.com/yiyufxst/design-pattern-java">https://github.com/yiyufxst/design-pattern-java</a></p>
+<p>参考资料：<br>小博哥重学设计模式：<a target="_blank" rel="noopener" href="https://github.com/fuzhengwei/itstack-demo-design">https://github.com/fuzhengwei/itstack-demo-design</a><br>深入设计模式：<a target="_blank" rel="noopener" href="https://refactoringguru.cn/design-patterns/catalog">https://refactoringguru.cn/design-patterns/catalog</a></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F/" rel="tag"># 组合模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/07/2021-03-07%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%85%AB%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E7%AC%AC%E4%B8%89%E6%96%B9%E7%99%BB%E5%BD%95%E5%AE%9E%E7%8E%B0%E3%80%8D/" rel="prev" title="初学 Java 设计模式（八）：实战桥接模式 「第三方登录实现」">
+      <i class="fa fa-chevron-left"></i> 初学 Java 设计模式（八）：实战桥接模式 「第三方登录实现」
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/03/21/2021-03-21%E5%88%9D%E5%AD%A6%20Java%20%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%88%E5%8D%81%EF%BC%89%EF%BC%9A%E5%AE%9E%E6%88%98%E8%A3%85%E9%A5%B0%E5%99%A8%E6%A8%A1%E5%BC%8F%20%E3%80%8C%E6%97%A5%E5%BF%97%E7%B3%BB%E7%BB%9F%E6%94%AF%E6%8C%81%E5%90%84%E7%B1%BB%E9%80%9A%E7%9F%A5%E7%BB%84%E5%90%88%E3%80%8D/" rel="next" title="初学 Java 设计模式（十）：实战装饰器模式 「日志系统支持各类通知组合」">
+      初学 Java 设计模式（十）：实战装饰器模式 「日志系统支持各类通知组合」 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">一、组合模式介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">1. 解决的问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. 定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">1.3.</span> <span class="nav-text">3. 应用场景</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">2.</span> <span class="nav-text">二、组合模式优缺点</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E4%BC%98%E7%82%B9"><span class="nav-number">2.1.</span> <span class="nav-text">1. 优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BC%BA%E7%82%B9"><span class="nav-number">2.2.</span> <span class="nav-text">2. 缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%86%B3%E7%AD%96%E6%A0%91%E5%AE%9E%E7%8E%B0%E7%B2%BE%E5%87%86%E5%8C%96%E8%BF%90%E8%90%A5"><span class="nav-number">3.</span> <span class="nav-text">三、组合模式应用实例：决策树实现精准化运营</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%9E%E4%BE%8B%E5%9C%BA%E6%99%AF"><span class="nav-number">3.1.</span> <span class="nav-text">1. 实例场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.</span> <span class="nav-text">2. 组合模式实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-1-%E5%B7%A5%E7%A8%8B%E7%BB%93%E6%9E%84"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.1 工程结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2 代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-1-%E6%A0%91%E7%9B%B8%E5%85%B3%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">2.2.1 树相关模型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-2-%E5%86%B3%E7%AD%96%E7%9B%B8%E5%85%B3%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">2.2.2 决策相关模型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-2-3-%E5%86%B3%E7%AD%96%E6%A0%91%E6%9C%8D%E5%8A%A1"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">2.2.3 决策树服务</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81"><span class="nav-number">3.2.3.</span> <span class="nav-text">2.3 测试验证</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-1-%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81%E7%B1%BB"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">2.3.1 测试验证类</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-3-2-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">2.3.2 测试结果</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%BB%84%E5%90%88%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84"><span class="nav-number">4.</span> <span class="nav-text">四、组合模式结构</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">yiyufxst</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">36</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">yiyufxst</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
